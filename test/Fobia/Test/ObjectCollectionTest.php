@@ -37,9 +37,15 @@ class ObjectItem
     public $name;
     public $key;
 
-    function __construct($name = 'default')
+    function __construct($name = 'default', $key = null, $keyName = null, $keyValue = null)
     {
         $this->name = $name;
+        $this->key = $key;
+
+        if ($keyName !== null) {
+            $this->$keyName = $keyValue;
+        }
+
     }
 
 }
@@ -47,7 +53,7 @@ class ObjectItem
 class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var ObjectCollection
+     * @var \Fobia\ObjectCollection
      */
     protected $object;
 
@@ -77,7 +83,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Fobia\Base\ObjectCollection::eq
+     * @covers Fobia\ObjectCollection::eq
      * @todo   Implement testEq().
      */
     public function testEq()
@@ -87,55 +93,138 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Fobia\Base\ObjectCollection::find
-     * @todo   Implement testFind().
-     */
-//    public function testFind()
-//    {
-//        // Remove the following lines when you implement this test.
-//        $this->markTestIncomplete(
-//          'This test has not been implemented yet.'
-//        );
-//    }
-
-    /**
-     * @covers Fobia\Base\ObjectCollection::set
-     * @todo   Implement testSet().
-     */
-//    public function testSet()
-//    {
-//        // Remove the following lines when you implement this test.
-//        $this->markTestIncomplete(
-//          'This test has not been implemented yet.'
-//        );
-//    }
-
-    /**
-     * @covers Fobia\Base\ObjectCollection::get
-     * @todo   Implement testGet().
-     */
-//    public function testGet()
-//    {
-//        // Remove the following lines when you implement this test.
-//        $this->markTestIncomplete(
-//          'This test has not been implemented yet.'
-//        );
-//    }
-
-    /**
-     * @covers Fobia\Base\ObjectCollection::addAt
+     * @covers Fobia\ObjectCollection::addAt
      * @todo   Implement testAddAt().
      */
-    public function testAddAt()
+    public function testAddAtDefault()
     {
-        $obj = new ObjectItem();
+        $obj = new ObjectItem('new');
         $this->object->addAt($obj);
 
         $this->assertEquals(2, $this->object->count());
+        $this->assertEquals($obj, $this->object->eq(1));
+    }
+
+        /**
+     * @covers Fobia\ObjectCollection::addAt
+     * @todo   Implement testAddAt().
+     */
+    public function testAddAtFirst()
+    {
+        $obj = new ObjectItem('new');
+        $this->object->addAt($obj, 0);
+
+        $this->assertEquals(2, $this->object->count());
+        $this->assertEquals($obj, $this->object->eq(0));
     }
 
     /**
-     * @covers Fobia\Base\ObjectCollection::merge
+     * @covers Fobia\ObjectCollection::addAt
+     * @todo   Implement testAddAt().
+     */
+    public function testAddAtOther()
+    {
+        $obj = new ObjectItem('new');
+        $this->object->addAt($obj, 7);
+
+        $this->assertEquals(2, $this->object->count());
+        $this->assertEquals($obj, $this->object->eq(1));
+
+        $obj2 = new ObjectItem('new 2');
+        $this->object->addAt($obj2, 1);
+
+        $this->assertEquals(3, $this->object->count());
+        $this->assertEquals($obj2, $this->object->eq(1));
+
+        $this->object->addAt($obj2, 1);
+        $this->assertEquals(4, $this->object->count());
+        $this->assertEquals($this->object->eq(2), $this->object->eq(1));
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::find
+     * @todo   Implement testFind().
+     */
+    public function testFindProperty()
+    {
+        $this->object->addAt(new ObjectItem('new_1'));
+        $this->object->addAt(new ObjectItem('new_2'));
+        $this->object->addAt(new ObjectItem('new_3'));
+
+        $obj = new ObjectItem('other');
+        $obj->otherKey = 17;
+        $this->object->addAt($obj);
+
+        $this->assertCount(5, $this->object);
+
+        $resultFind = $this->object->find('otherKey');
+        $this->assertInstanceOf('\Fobia\ObjectCollection', $resultFind);
+        $this->assertCount(1, $resultFind);
+
+        $this->assertEquals($obj, $resultFind->eq());
+    }
+
+
+    public function testFindValue()
+    {
+        $this->object->addAt(new ObjectItem('new_1', 1));
+        $this->object->addAt(new ObjectItem('new_1', 2));
+        $this->object->addAt(new ObjectItem('new_2', 3));
+        $this->object->addAt(new ObjectItem('new_3', 4));
+
+        $resultFind = $this->object->find('name', 'new_1');
+        $this->assertCount(2, $resultFind);
+        $this->assertNotSame($resultFind->eq(0), $resultFind->eq(1));
+        
+        $this->assertEquals($this->object->eq(1), $resultFind->eq(0));
+        $this->assertEquals($this->object->eq(2), $resultFind->eq(1));
+
+
+        $resultFind->set('key', 'find');
+        $this->assertEquals('find', $this->object->eq(1)->key);
+        $this->assertEquals('find', $this->object->eq(2)->key);
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::set
+     * @todo   Implement testSet().
+     */
+    public function testSet()
+    {
+        // Remove the following lines when you implement this test.
+        $this->object->addAt(new ObjectItem());
+
+        $this->object->set('key', 'set value');
+        foreach ($this->object as $obj) {
+            $this->assertEquals('set value', $obj->key);
+        }
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::get
+     * @todo   Implement testGet().
+     */
+    public function testGet()
+    {
+        $obj1 = new ObjectItem(1);
+        $obj2 = new ObjectItem(2);
+        $obj3 = new ObjectItem(3);
+
+        $this->object->eq()->name = 0;
+        $this->object->addAt($obj1);
+        $this->object->addAt($obj2);
+        $this->object->addAt($obj3);
+
+        $get = $this->object->get('name');
+        foreach ($get as $key => $value) {
+            $this->assertEquals($key, $value);
+        }
+    }
+
+
+
+    /**
+     * @covers Fobia\ObjectCollection::merge
      * @todo   Implement testMerge().
      */
 //    public function testMerge()
@@ -147,7 +236,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 //    }
 
     /**
-     * @covers Fobia\Base\ObjectCollection::removeAt
+     * @covers Fobia\ObjectCollection::removeAt
      * @todo   Implement testRemoveAt().
      */
 //    public function testRemoveAt()
@@ -159,7 +248,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 //    }
 
     /**
-     * @covers Fobia\Base\ObjectCollection::remove
+     * @covers Fobia\ObjectCollection::remove
      * @todo   Implement testRemove().
      */
 //    public function testRemove()
@@ -171,7 +260,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 //    }
 
     /**
-     * @covers Fobia\Base\ObjectCollection::each
+     * @covers Fobia\ObjectCollection::each
      * @todo   Implement testEach().
      */
 //    public function testEach()
@@ -183,7 +272,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 //    }
 
     /**
-     * @covers Fobia\Base\ObjectCollection::sort
+     * @covers Fobia\ObjectCollection::sort
      * @todo   Implement testSort().
      */
 //    public function testSort()
@@ -195,16 +284,17 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 //    }
 
     /**
-     * @covers Fobia\Base\ObjectCollection::count
+     * @covers Fobia\ObjectCollection::count
      * @todo   Implement testCount().
      */
     public function testCount()
     {
+        $this->assertCount(1, $this->object);
         $this->assertEquals(1, $this->object->count());
     }
 
     /**
-     * @covers Fobia\Base\ObjectCollection::getIterator
+     * @covers Fobia\ObjectCollection::getIterator
      * @todo   Implement testGetIterator().
      */
     public function testGetIterator()
@@ -219,7 +309,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Fobia\Base\ObjectCollection::toArray
+     * @covers Fobia\ObjectCollection::toArray
      * @todo   Implement testToArray().
      */
     public function testToArray()

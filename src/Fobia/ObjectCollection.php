@@ -165,9 +165,9 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             $object = (object) $object;
         }
 
-        if ($index === null) {
+        if ($index === null  || (int) $index >= $this->count()) {
             array_push($this->data, $object);
-        } elseif ($index === 0) {
+        } elseif ($index === 0 || (int) $index <= 0) {
             array_unshift($this->data, $object);
         } else {
             $arr = array();
