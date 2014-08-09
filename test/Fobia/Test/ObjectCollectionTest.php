@@ -180,6 +180,43 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('new-2', $collection->eq(0)->name);
     }
 
+    /**
+     * @covers Fobia\ObjectCollection::find
+     * @todo   Implement testFind().
+     */
+    public function testFilter()
+    {
+        $this->object->addAt(new ObjectItem('new_1'));
+        $this->object->addAt(new ObjectItem('new_2'));
+        $this->object->addAt(new ObjectItem('new_3'));
+
+        $obj = new ObjectItem('other');
+        $this->object->addAt($obj);
+
+        $param = 'other';
+        $this->object->filter(function($obj, $key, $param) {
+            if ($obj->name === $param) {
+                return false;
+            } else {
+                return true;
+            }
+        }, $param);
+
+        $this->assertCount(4, $this->object);
+
+        $this->object->addAt($obj);
+        $this->assertCount(5, $this->object);
+
+        $this->object->filter(function($obj) {
+            if ($obj->name !== 'other') {
+                return false;
+            } else {
+                return true;
+            }
+        });
+        $this->assertCount(1, $this->object);
+        $this->assertEquals($obj,     $this->object->eq());
+    }
 
     /**
      * @covers Fobia\ObjectCollection::find

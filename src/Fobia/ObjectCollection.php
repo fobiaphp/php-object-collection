@@ -123,6 +123,38 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Отфильтровать список объектов используя функции обратного вызова.
+     * В Функцию передаються объект  и его индекс.
+     * Все объекты на которые функция вернула false, исключаються
+     * 
+     * @param callable $callback
+     * @param mixed ...
+     * @return self
+     */
+    public function filter($callback)
+    {
+        if ( ! is_callable($callback)) {
+            trigger_error("CORE: Параметр не является функцией обратного вызова.",
+                          E_USER_ERROR);
+        }
+
+        $args = func_get_args();
+        array_shift($args);
+
+        $arr = array();
+        foreach ($this->data as $key => $obj) {
+            if (call_user_func_array($callback, array_merge(array($obj, $key), $args))){
+                $arr[] = $obj;
+            }
+        }
+
+        $this->data = $arr;
+        $this->_resor();
+
+        return $this;
+    }
+
+    /**
      * Установить свойства в новое значение.
      *
      * @param string   $name    имя свойства
