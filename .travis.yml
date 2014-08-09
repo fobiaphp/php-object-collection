@@ -9,3 +9,6 @@ before_script:
   - composer install --prefer-dist --dev
 
 script: phpunit --coverage-text
+
+notifications:
+  email: "travis@ufac.ru"

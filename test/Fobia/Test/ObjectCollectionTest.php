@@ -185,6 +185,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('find', $this->object->eq(2)->key);
     }
 
+
     /**
      * @covers Fobia\ObjectCollection::set
      * @todo   Implement testSet().
@@ -239,49 +240,83 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      * @covers Fobia\ObjectCollection::removeAt
      * @todo   Implement testRemoveAt().
      */
-//    public function testRemoveAt()
-//    {
-//        // Remove the following lines when you implement this test.
-//        $this->markTestIncomplete(
-//          'This test has not been implemented yet.'
-//        );
-//    }
+    public function testRemoveAt()
+    {
+        $foo = new ObjectItem('foo');
+        $this->object->addAt($foo);
+        $this->assertCount(2, $this->object);
+
+        $this->object->removeAt();
+        $this->assertCount(1, $this->object);
+        $this->assertNotEquals('foo', $this->object->eq()->name);
+
+        $this->object->addAt($foo);
+        $this->object->removeAt(0);
+        $this->assertCount(1, $this->object);
+        $this->assertEquals('foo', $this->object->eq()->name);
+    }
 
     /**
      * @covers Fobia\ObjectCollection::remove
      * @todo   Implement testRemove().
      */
-//    public function testRemove()
-//    {
-//        // Remove the following lines when you implement this test.
-//        $this->markTestIncomplete(
-//          'This test has not been implemented yet.'
-//        );
-//    }
+    public function testRemove()
+    {
+        $foo = new ObjectItem('foo');
+        $this->object->addAt($foo);
+
+        $this->object->remove($foo);
+        $this->assertCount(1, $this->object);
+        $this->assertNotEquals('foo', $this->object->eq()->name);
+    }
 
     /**
      * @covers Fobia\ObjectCollection::each
      * @todo   Implement testEach().
      */
-//    public function testEach()
-//    {
-//        // Remove the following lines when you implement this test.
-//        $this->markTestIncomplete(
-//          'This test has not been implemented yet.'
-//        );
-//    }
+    public function testEach()
+    {
+        $this->object->addAt(new ObjectItem('new_4', 1));
+        $this->object->addAt(new ObjectItem('new_3', 2));
+        $this->object->addAt(new ObjectItem('new_2', 3));
+        $this->object->addAt(new ObjectItem('new_1', 4));
+
+        $self = & $this;
+        $this->object->each(function($obj, $index) use ($self) {
+            $self->assertEquals($self->object->eq($index), $obj);
+            $obj->each = true;
+        });
+
+        foreach ($this->object as $obj) {
+            $self->assertTrue($obj->each);
+        }
+
+        $findResult = $this->object->find('key', function($key) {
+             return ($key > 2);
+        });
+        $self->assertCount(2, $findResult);
+    }
 
     /**
      * @covers Fobia\ObjectCollection::sort
      * @todo   Implement testSort().
      */
-//    public function testSort()
-//    {
-//        // Remove the following lines when you implement this test.
-//        $this->markTestIncomplete(
-//          'This test has not been implemented yet.'
-//        );
-//    }
+    public function testSort()
+    {
+        $this->object->addAt(new ObjectItem('new_1', 4));
+        $this->object->addAt(new ObjectItem('new_3', 2));
+        $this->object->addAt(new ObjectItem('new_2', 3));
+        $this->object->addAt(new ObjectItem('new_4', 1));
+        $this->object->eq()->key = 1000;
+
+        $this->object->sort('key');
+        $this->assertEquals(1, $this->object->eq()->key);
+
+        $this->object->sort(function($a, $b) {
+            return ($a->key != 4);
+        });
+        $this->assertEquals(4, $this->object->eq()->key);
+    }
 
     /**
      * @covers Fobia\ObjectCollection::count

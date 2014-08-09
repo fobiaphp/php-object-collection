@@ -234,7 +234,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     public function remove($object)
     {
-        $keys = array_keys($object, $this->data, true);
+        $keys = array_keys($this->data, $object, true);
         foreach ($keys as $key) {
             unset($this->data[$key]);
         }
@@ -270,18 +270,29 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Сортирует список, используя функцию обратного вызова либо по полю.
      *
      * @param callback|string $param  int callback ( mixed $a, mixed $b )
-     * @param mixed    $args
+     * @param mixed           $args
      * @return self
      */
     public function sort($param, $args = null)
     {
-        if (is_callable($param)) {
-            usort($this->data, $param($args));
-        } else {
+        if ( is_string($param) ) {
             usort($this->data, $this->_sort_property($param));
+        } else {
+            if ( is_callable($param) ) {
+                usort($this->data, $param);
+            } else {
+                usort($this->data, $this->_sort_property($param));
+            }
         }
 
         return $this;
+    }
+
+    protected function _sort_callable($callable, $args = null)
+    {
+        return function($a, $b) use($callable, $args) {
+            return $callable($a, $b, $args);
+        };
     }
 
     /**
@@ -304,9 +315,9 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * @param string $key
      * @return int
      */
-    protected function _sort_property($key)
+    protected function _sort_property($key = null)
     {
-        if ( ! $key) {
+        if ( ! $key ) {
             return 0;
         }
         return function($a, $b) use($key) {
