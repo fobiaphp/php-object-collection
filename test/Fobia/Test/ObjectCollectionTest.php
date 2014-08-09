@@ -31,24 +31,7 @@
 namespace Fobia\Test;
 
 use Fobia\ObjectCollection;
-
-class ObjectItem
-{
-    public $name;
-    public $key;
-
-    function __construct($name = 'default', $key = null, $keyName = null, $keyValue = null)
-    {
-        $this->name = $name;
-        $this->key = $key;
-
-        if ($keyName !== null) {
-            $this->$keyName = $keyValue;
-        }
-
-    }
-
-}
+use ObjectItem;
 
 class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 {
@@ -173,6 +156,30 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('new-10', $collection->eq(10)->name);
         $this->assertEquals('add', $collection->eq(11)->name);
     }
+
+    /**
+     * @covers Fobia\ObjectCollection::addAt
+     * @todo   Implement testAddAt().
+     */
+    public function testAddAtUniqe()
+    {
+        $collection = new ObjectCollection();
+        for ($index = 1; $index <= 10; $index ++ ) {
+            $collection->addAt(new ObjectItem('new-' . $index));
+        }
+        $this->assertCount(10, $collection);
+        $collection->unique();
+
+        $obj = $collection->eq();
+        $this->assertEquals('new-1', $obj->name);
+
+        $collection->addAt($obj);
+        $this->assertCount(10, $collection);
+        $this->assertEquals($obj,     $collection->eq(9));
+        $this->assertEquals('new-10', $collection->eq(8)->name);
+        $this->assertEquals('new-2', $collection->eq(0)->name);
+    }
+
 
     /**
      * @covers Fobia\ObjectCollection::find
@@ -385,5 +392,57 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $arr = $this->object->toArray();
         $this->assertInternalType('array', $arr);
         $this->assertInternalType('object', $arr[0]);
+    }
+
+
+
+    public function testUnique()
+    {
+        $obj = new \ObjectItem('add-1');
+        $this->object->addAt($obj);
+        $this->object->addAt($obj);
+        $this->object->addAt($obj);
+
+        $this->assertCount(4, $this->object);
+
+        $this->object->unique();
+        $this->assertCount(2, $this->object);
+
+        $this->object->addAt($obj);
+        $this->object->addAt($obj);
+        $this->object->addAt($obj);
+        $this->assertCount(2, $this->object);
+    }
+
+    public function testMerge()
+    {
+        $obj = new \ObjectItem('add-1');
+        $collection = new ObjectCollection();
+        $collection->addAt($obj);
+        $collection->addAt($obj);
+        $collection->addAt($obj);
+
+        $this->object->merge($collection);
+        $this->assertCount(4, $this->object);
+
+        $this->object->unique();
+        $this->assertCount(2, $this->object);
+        $this->object->merge($collection);
+        $this->assertCount(2, $this->object);
+    }
+
+
+    public function testArrayParametr()
+    {
+        $collection = new ObjectCollection();
+        $collection->addAt(array('n' => 1));
+        $collection->addAt(array('n' => 2));
+        $collection->addAt(array('n' => 3));
+        $collection->addAt(array('n' => 4));
+        $this->assertCount(4, $collection);
+
+        $collection->addAt(array('n' => 4));
+        $collection->addAt(array('n' => 4));
+        $collection->unique(false);
     }
 }

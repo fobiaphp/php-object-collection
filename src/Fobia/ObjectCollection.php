@@ -45,6 +45,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /** @var int */
     private $_count = 0;
 
+    private $_unique = false;
+
     /**
      * @internal
      */
@@ -161,18 +163,29 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     public function addAt($object, $index = null)
     {
-        if ($index === null) {
-            $index = $this->_count;
-        }
-        $arr_before = array_slice($this->data, 0, $index);
-        $arr_after =  array_slice($this->data,    $index);
-
+        $strict = true;
         if ( ! is_object($object)) {
             $object = (object) $object;
+            $strict = false;
+        }
+        if ($this->_unique) {
+            $keys = array_keys($this->data, $object, $strict);
+            if ($keys) {
+                foreach ($keys as $k) {
+                    unset($this->data[$k]);
+                }
+            }
         }
 
-        $this->data = array_merge($arr_before, array($object), $arr_after);
-        $this->_resor(false);
+        if ($index === null || $index >= $this->_count) {
+            array_push($this->data, $object);
+        } else {
+            $arr_before = array_slice($this->data, 0, $index);
+            $arr_after =  array_slice($this->data,    $index);
+
+            $this->data = array_merge($arr_before, array($object), $arr_after);
+        }
+        $this->_resor(true);
         return $this;
     }
 
@@ -188,15 +201,22 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             $data = $data->toArray();
         }
 
-        if (is_array($data)) {
+        if ( ! is_array($data) ) {
+            $data = array($data);
+        }
+
+        if (!$this->_unique) {
             array_walk($data, function(&$value) {
                 $value = (object) $value;
             });
             $this->data  = array_merge($this->data, $data);
             $this->_resor(false);
         } else {
-            $this->addAt($data);
+            foreach ($data as $obj) {
+                $this->addAt($obj);
+            }
         }
+
         return $this;
     }
 
@@ -254,6 +274,27 @@ class ObjectCollection implements \IteratorAggregate, \Countable
                 break;
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * Устанавливает только уникальные элементы
+     * 
+     * @return \self
+     */
+    public function unique($strict = true)
+    {
+        $arr = array();
+        foreach ($this->data as $obj) {
+            if ( !array_keys($arr, $obj, $strict) ) {
+                $arr[] = $obj;
+            }
+        }
+        $this->data = $arr;
+        $this->_resor();
+        
+        $this->_unique = true;
 
         return $this;
     }

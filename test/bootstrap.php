@@ -7,5 +7,5 @@ if (!file_exists($autoloadFile)) {
 require_once $autoloadFile;
 
 $loader = new \Composer\Autoload\ClassLoader();
-$loader->add('Fobia\Test', 'test');
+$loader->add('', 'test');
 $loader->register();
