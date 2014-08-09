@@ -142,6 +142,39 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers Fobia\ObjectCollection::addAt
+     * @todo   Implement testAddAt().
+     */
+    public function testAddAtOther2()
+    {
+        $collection = new ObjectCollection();
+        for ($index = 0; $index <= 10; $index ++ ) {
+            $collection->addAt(new ObjectItem('new-' . $index));
+        }
+        $this->assertCount(11, $collection);
+
+        $collection->addAt(new ObjectItem('add'), 2);
+        $this->assertCount(12, $collection);
+        $this->assertEquals('new-1', $collection->eq(1)->name);
+        $this->assertEquals('add', $collection->eq(2)->name);
+        $this->assertEquals('new-2', $collection->eq(3)->name);
+        $collection->removeAt(2);
+
+        $collection->addAt(new ObjectItem('add'), -1);
+        $this->assertCount(12, $collection);
+        $this->assertEquals('new-9', $collection->eq(9)->name);
+        $this->assertEquals('add', $collection->eq(10)->name);
+        $this->assertEquals('new-10', $collection->eq(11)->name);
+        $collection->removeAt(10);
+
+        $collection->addAt(new ObjectItem('add'), 99);
+        $this->assertCount(12, $collection);
+        $this->assertEquals('new-1', $collection->eq(1)->name);
+        $this->assertEquals('new-10', $collection->eq(10)->name);
+        $this->assertEquals('add', $collection->eq(11)->name);
+    }
+
+    /**
      * @covers Fobia\ObjectCollection::find
      * @todo   Implement testFind().
      */

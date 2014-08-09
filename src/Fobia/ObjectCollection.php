@@ -161,26 +161,18 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     public function addAt($object, $index = null)
     {
+        if ($index === null) {
+            $index = $this->_count;
+        }
+        $arr_before = array_slice($this->data, 0, $index);
+        $arr_after =  array_slice($this->data,    $index);
+
         if ( ! is_object($object)) {
             $object = (object) $object;
         }
 
-        if ($index === null  || (int) $index >= $this->count()) {
-            array_push($this->data, $object);
-        } elseif ($index === 0 || (int) $index <= 0) {
-            array_unshift($this->data, $object);
-        } else {
-            $arr = array();
-            for ($i = 0; $i < $this->_count; $i ++ ) {
-                if ($i == $index) {
-                    array_push($arr, $object);
-                }
-                array_push($arr, $this->data[$i]);
-            }
-            $this->data = $arr;
-        }
+        $this->data = array_merge($arr_before, array($object), $arr_after);
         $this->_resor(false);
-
         return $this;
     }
 
