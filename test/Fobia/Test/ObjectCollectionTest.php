@@ -95,8 +95,8 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     public function testAddAtFirst()
     {
         $obj = new ObjectItem('new');
-        $this->object->addAt($obj, 0);
 
+        $this->object->addAt($obj, 0);
         $this->assertEquals(2, $this->object->count());
         $this->assertEquals($obj, $this->object->eq(0));
     }

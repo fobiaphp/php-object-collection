@@ -1,6 +1,6 @@
 # PHP Object Collection
 
-[![Latest Stable Version](https://poser.pugx.org/fobia/php-object-collection/v/stable.svg)](https://packagist.org/packages/fobia/php-object-collection) [![Total Downloads](https://poser.pugx.org/fobia/php-object-collection/downloads.svg)](https://packagist.org/packages/fobia/php-object-collection) [![Latest Unstable Version](https://poser.pugx.org/fobia/php-object-collection/v/unstable.svg)](https://packagist.org/packages/fobia/php-object-collection) [![License](https://poser.pugx.org/fobia/php-object-collection/license.svg)](https://packagist.org/packages/fobia/php-object-collection)
+[![Latest Stable Version](https://poser.pugx.org/fobia/php-object-collection/v/stable.svg)](https://packagist.org/packages/fobia/php-object-collection) [![Total Downloads](https://poser.pugx.org/fobia/php-object-collection/downloads.svg)](https://packagist.org/packages/fobia/php-object-collection) [![Latest Unstable Version](https://travis-ci.org/fobiaweb/php-object-collection.svg?branch=master)](https://packagist.org/packages/fobia/php-object-collection) [![License](https://poser.pugx.org/fobia/php-object-collection/license.svg)](https://packagist.org/packages/fobia/php-object-collection)
 
 
 ## Installation

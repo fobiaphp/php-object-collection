@@ -258,17 +258,16 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             $data = array($data);
         }
 
-        if (!$this->_unique) {
-            array_walk($data, function(&$value) {
-                $value = (object) $value;
-            });
-            $this->data  = array_merge($this->data, $data);
-            $this->_resor(false);
-        } else {
-            foreach ($data as $obj) {
-                $this->addAt($obj);
-            }
+        array_walk($data, function(&$value) {
+            $value = (object) $value;
+        });
+        $this->data  = array_merge($this->data, $data);
+
+        if ($this->_unique) {
+            $this->unique();
         }
+
+        $this->_resor(true);
 
         return $this;
     }
