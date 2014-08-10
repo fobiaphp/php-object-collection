@@ -323,7 +323,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         }
 
         foreach ($this->data as $key => $obj) {
-            if ($callback($obj, $key, $args) === false) {
+            if (call_user_func_array($callback, array($obj, $key, $args)) === false) {
+            // if ($callback($obj, $key, $args) === false) {
                 break;
             }
         }
