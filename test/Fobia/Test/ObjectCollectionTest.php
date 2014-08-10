@@ -220,6 +220,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($obj,     $this->object->eq());
     }
 
+
     /**
      * @covers Fobia\ObjectCollection::find
      * @todo   Implement testFind().
@@ -254,7 +255,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $resultFind = $this->object->find('name', 'new_1');
         $this->assertCount(2, $resultFind);
         $this->assertNotSame($resultFind->eq(0), $resultFind->eq(1));
-        
+
         $this->assertEquals($this->object->eq(1), $resultFind->eq(0));
         $this->assertEquals($this->object->eq(2), $resultFind->eq(1));
 
@@ -262,6 +263,25 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $resultFind->set('key', 'find');
         $this->assertEquals('find', $this->object->eq(1)->key);
         $this->assertEquals('find', $this->object->eq(2)->key);
+    }
+
+    public function testFindCallback()
+    {
+        $this->object->addAt(new ObjectItem('new_1', 1));
+        $this->object->addAt(new ObjectItem('new_1', 2));
+        $this->object->addAt(new ObjectItem('new_2', 3));
+        $this->object->addAt(new ObjectItem('new_3', 4));
+
+        $resultFind = $this->object->find(function($obj, $key, $value) {
+            if ($obj->$key == $value) {
+                return true;
+            }
+        },
+        'name', 'new_1' );
+
+        $this->assertCount(2, $resultFind);
+        $this->assertEquals('new_1', $resultFind->eq(0)->name);
+        $this->assertEquals($this->object->eq(2), $resultFind->eq(1));
     }
 
 

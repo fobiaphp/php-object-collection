@@ -81,8 +81,11 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * ### Поиск объектов со свойством равным указаному значению
      * e.g `find('Location', 'localhost/js');`
      *
-     * ### Поиск объектов удавлетворяющие возврату йункции
+     * ### Поиск объектов удавлетворяющие возврату функции
      * e.g `find('Location', function($name_value, $obj, $args), $args);`
+     *
+     * ### Поиск объектов удавлетворяющие возврату функции
+     * e.g `find(function($obj, $args...),  $args, ...);`
      *
      * @param string   $name       название свойства
      * @param mixed    $param      его значение или функция обратного вызова.
@@ -90,12 +93,24 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * @param mixed    $args       дополнительные параметры, переданные в функцию
      *                             обратного вызова.
      * @return \Fobia\ObjectCollection  колекция найденных объектов.
-     * 
+     *
      * @api
      */
     public function find($name, $param = null, $args = null)
     {
         $data = array();
+
+        if (!is_string($name) && is_callable($name)) {
+            $args = func_get_args();
+            array_shift($args);
+
+            foreach ($this->data as $obj) {
+                if (call_user_func_array($name, array_merge(array($obj), $args) ) ){
+                    $data[] = $obj;
+                }
+            }
+            return new self($data);
+        }
 
         // Существавание свойства
         if (func_num_args() == 1) {
@@ -131,7 +146,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Отфильтровать список объектов используя функции обратного вызова.
      * В Функцию передаються объект  и его индекс.
      * Все объекты на которые функция вернула false, исключаються
-     * 
+     *
      * @param callable $callback
      * @param mixed ...
      * @return self
@@ -223,7 +238,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             $this->data = array_merge($arr_before, array($object), $arr_after);
         }
         $this->_resor(true);
-        
+
         return $this;
     }
 
@@ -318,7 +333,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
 
     /**
      * Устанавливает только уникальные элементы
-     * 
+     *
      * @return \self
      */
     public function unique($strict = true)
@@ -331,7 +346,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         }
         $this->data = $arr;
         $this->_resor(false);
-        
+
         $this->_unique = true;
 
         return $this;
