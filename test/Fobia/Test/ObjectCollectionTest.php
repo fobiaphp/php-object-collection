@@ -167,17 +167,19 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         for ($index = 1; $index <= 10; $index ++ ) {
             $collection->addAt(new ObjectItem('new-' . $index));
         }
-        $this->assertCount(10, $collection);
         $collection->unique();
+        $this->assertCount(10, $collection);
 
         $obj = $collection->eq();
         $this->assertEquals('new-1', $obj->name);
 
         $collection->addAt($obj);
         $this->assertCount(10, $collection);
-        $this->assertEquals($obj,     $collection->eq(9));
+
+        $this->assertEquals($obj,     $collection->eq(9) );
+        $this->assertEquals('new-2',  $collection->eq(0)->name);
         $this->assertEquals('new-10', $collection->eq(8)->name);
-        $this->assertEquals('new-2', $collection->eq(0)->name);
+        $this->assertEquals('new-1',  $collection->eq(9)->name);
     }
 
     /**

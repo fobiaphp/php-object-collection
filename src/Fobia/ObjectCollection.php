@@ -45,6 +45,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /** @var int */
     private $_count = 0;
 
+    /** @var boolean */
     private $_unique = false;
 
     /**
@@ -72,6 +73,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Найти все элементы, параметр которых удовлетворяют услови.
      *
+     * Возвращает новый объект
+     *
      * ### Поиск объектов с существующим свойством
      * e.g `find('Location');`
      *
@@ -86,7 +89,9 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      *                             в функцию передаеться [значение поля, оъект, $args]
      * @param mixed    $args       дополнительные параметры, переданные в функцию
      *                             обратного вызова.
-     * @return self  колекция найденных объектов.
+     * @return \Fobia\ObjectCollection  колекция найденных объектов.
+     * 
+     * @api
      */
     public function find($name, $param = null, $args = null)
     {
@@ -149,7 +154,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         }
 
         $this->data = $arr;
-        $this->_resor();
+        $this->_resor(false);
 
         return $this;
     }
@@ -218,6 +223,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             $this->data = array_merge($arr_before, array($object), $arr_after);
         }
         $this->_resor(true);
+        
         return $this;
     }
 
@@ -265,7 +271,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         }
 
         unset($this->data[$index]);
-        $this->_resor();
+        $this->_resor(true);
 
         return $this;
     }
@@ -282,7 +288,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         foreach ($keys as $key) {
             unset($this->data[$key]);
         }
-        $this->_resor();
+        $this->_resor(true);
         return $this;
     }
 
@@ -324,7 +330,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             }
         }
         $this->data = $arr;
-        $this->_resor();
+        $this->_resor(false);
         
         $this->_unique = true;
 
@@ -363,11 +369,12 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Пересобрать список объектов
      *
+     * @param boolean $resor_keys перенумеровать ключи
      * @return int   количество элементов
      */
-    protected function _resor($resor_values = true)
+    protected function _resor($resor_keys)
     {
-        if ($resor_values) {
+        if ($resor_keys) {
             $this->data = array_values($this->data);
         }
         $this->_count = count($this->data);
