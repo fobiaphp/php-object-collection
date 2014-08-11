@@ -31,7 +31,24 @@
 namespace Fobia\Test;
 
 use Fobia\ObjectCollection;
-use ObjectItem;
+
+class ObjectItem
+{
+    public $name;
+    public $key;
+
+    function __construct($name = 'default', $key = null, $keyName = null, $keyValue = null)
+    {
+        $this->name = $name;
+        $this->key = $key;
+
+        if ($keyName !== null) {
+            $this->$keyName = $keyValue;
+        }
+
+    }
+
+}
 
 class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 {
@@ -55,7 +72,21 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         return $arr;
     }
 
+    /**
+     *
+     * @param int $count
+     * @return \Fobia\ObjectCollection
+     */
+    public function createObjectCollection($count = 1)
+    {
+        $objectCollection = new ObjectCollection();
 
+        for ($index = 0; $index < $count; $index ++ ) {
+            $objectCollection->addAt(new ObjectItem("name_$index", $index));
+        }
+        return $objectCollection;
+    }
+    
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -74,6 +105,24 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $obj = $this->object->eq();
         $this->assertEquals('default', $obj->name);
     }
+
+
+    /**
+     * @covers Fobia\ObjectCollection::index
+     * @todo   Implement testIndex().
+     */
+    public function testIndex()
+    {
+        $obj = $this->object->eq();
+        $k = $this->object->index($obj);
+        $this->assertEquals(0, $k[0]);
+
+        $obj1 = new ObjectItem('new');
+        $this->object->addAt($obj1);
+        $k = $this->object->index($obj1);
+        $this->assertEquals(1, $k[0]);
+    }
+
 
     /**
      * @covers Fobia\ObjectCollection::addAt
@@ -321,7 +370,27 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * @covers Fobia\ObjectCollection::getArr
+     * @todo   Implement testGetArr().
+     */
+    public function testGetArr()
+    {
+        $objects = new ObjectCollection(array(
+            new ObjectItem('name_0', 0),
+            new ObjectItem('name_1', 1),
+            new ObjectItem('name_2', 2),
+            new ObjectItem('name_3', 3),
+        ));
 
+        $get = $objects->getArr('name', 'key');
+
+        $this->assertInternalType('array', $get);
+        foreach ($get as $key => $value) {
+            $this->assertEquals("name_{$key}", $value['name']);
+            $this->assertEquals($key, $value['key']);
+        }
+    }
 
     /**
      * @covers Fobia\ObjectCollection::merge
@@ -398,6 +467,26 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers Fobia\ObjectCollection::each
+     * @todo   Implement testEach().
+     */
+    public function testEachCallback()
+    {
+        $this->object->addAt(new ObjectItem('new_1', 1));
+        $this->object->addAt(new ObjectItem('new_2', 2));
+        $this->object->addAt(new ObjectItem('new_3', 3));
+        $this->object->addAt(new ObjectItem('new_4', 4));
+
+        $this->object->each(function($obj) {
+            $obj->name = "each";
+            return false;
+        });
+        
+        $this->assertEquals("each", $this->object->eq()->name);
+        $this->assertEquals("new_1", $this->object->eq(1)->name);
+    }
+
+    /**
      * @covers Fobia\ObjectCollection::sort
      * @todo   Implement testSort().
      */
@@ -458,7 +547,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     public function testUnique()
     {
-        $obj = new \ObjectItem('add-1');
+        $obj = new ObjectItem('add-1');
         $this->object->addAt($obj);
         $this->object->addAt($obj);
         $this->object->addAt($obj);
@@ -476,7 +565,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     public function testMerge()
     {
-        $obj = new \ObjectItem('add-1');
+        $obj = new ObjectItem('add-1');
         $collection = new ObjectCollection();
         $collection->addAt($obj);
         $collection->addAt($obj);

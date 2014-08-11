@@ -11,7 +11,7 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/fobia/php-object-collection/issues"
+        "issues": "https://github.com/fobiaweb/php-object-collection/issues"
     },
     "require": {
         "php": ">=5.3.0"

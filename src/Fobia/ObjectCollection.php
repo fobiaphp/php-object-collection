@@ -175,6 +175,19 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Возвращает индекс объекта в колекции
+     *
+     * @param mixed   $object
+     * @param boolean $strict
+     * @return array
+     */
+    public function index($object, $strict = true)
+    {
+        $keys = array_keys($this->data, $object, $strict);
+        return $keys;
+    }
+
+    /**
      * Установить свойства в новое значение.
      *
      * @param string   $name    имя свойства
@@ -204,6 +217,29 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         }
 
         return $data;
+    }
+
+    /**
+     * Выбрать список значений свойсвт объектов.
+     *
+     * @param string $name
+     * @param string ...
+     * @return array
+     */
+    public function getArr($name)
+    {
+        $arr = array();
+        $names = func_get_args();
+
+        foreach ($this->data as $object) {
+            $item = array();
+            foreach ($names as $name) {
+                $item[$name] = $object->$name;
+            }
+            $arr[] = $item;
+        }
+
+        return $arr;
     }
 
     /**
