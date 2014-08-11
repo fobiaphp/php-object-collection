@@ -29,7 +29,7 @@
             highlight="true"
             lowUpperBound="35"
             highLowerBound="70"
-            target="tmp/report"
+            target="tmp"
        />
     </logging>
 </phpunit>

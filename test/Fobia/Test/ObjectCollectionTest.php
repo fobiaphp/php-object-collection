@@ -57,7 +57,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     protected $object;
 
-    public function newItem($key1)
+    protected function newItem($key1)
     {
         $arr = array(
             'key1' => $key1
@@ -77,7 +77,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      * @param int $count
      * @return \Fobia\ObjectCollection
      */
-    public function createObjectCollection($count = 1)
+    protected function createObjectCollection($count = 1)
     {
         $objectCollection = new ObjectCollection();
 
@@ -86,7 +86,19 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         }
         return $objectCollection;
     }
-    
+
+
+    protected function setErrorHandler()
+    {
+        set_error_handler(function($errno) {
+            if ($errno == E_USER_ERROR) {
+                throw new \Exception("Error", $errno);
+            }
+            return false;
+        });
+    }
+
+
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -94,6 +106,25 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->object = new ObjectCollection(array(new ObjectItem()));
+    }
+
+    /*************************************************************************
+     * TEST FUNCTION
+     *************************************************************************/
+    
+    /**
+     * @covers Fobia\ObjectCollection::__construct
+     * @todo   Implement testConstruct().
+     */
+    public function testConstruct()
+    {
+        $object = new ObjectCollection();
+        $this->assertInstanceOf('\Fobia\ObjectCollection', $object);
+
+        $object = new ObjectCollection(array(
+            new ObjectItem('new')
+        ));
+        $this->assertInstanceOf('\Fobia\ObjectCollection', $object);
     }
 
     /**
@@ -105,7 +136,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $obj = $this->object->eq();
         $this->assertEquals('default', $obj->name);
     }
-
 
     /**
      * @covers Fobia\ObjectCollection::index
@@ -123,10 +153,9 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, $k[0]);
     }
 
-
     /**
      * @covers Fobia\ObjectCollection::addAt
-     * @todo   Implement testAddAt().
+     * @todo   Implement testAddAtDefault().
      */
     public function testAddAtDefault()
     {
@@ -137,9 +166,27 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($obj, $this->object->eq(1));
     }
 
-        /**
+    /**
      * @covers Fobia\ObjectCollection::addAt
-     * @todo   Implement testAddAt().
+     * @todo   Implement testAddAtArrayParametr().
+     */
+    public function testAddAtArrayParametr()
+    {
+        $collection = new ObjectCollection();
+        $collection->addAt(array('n' => 1));
+        $collection->addAt(array('n' => 2));
+        $collection->addAt(array('n' => 3));
+        $collection->addAt(array('n' => 4));
+        $this->assertCount(4, $collection);
+
+        $collection->addAt(array('n' => 4));
+        $collection->addAt(array('n' => 4));
+        $collection->unique(false);
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::addAt
+     * @todo   Implement testAddAtFirst().
      */
     public function testAddAtFirst()
     {
@@ -152,7 +199,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::addAt
-     * @todo   Implement testAddAt().
+     * @todo   Implement testAddAtOther().
      */
     public function testAddAtOther()
     {
@@ -175,7 +222,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::addAt
-     * @todo   Implement testAddAt().
+     * @todo   Implement testAddAtOther2().
      */
     public function testAddAtOther2()
     {
@@ -208,7 +255,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::addAt
-     * @todo   Implement testAddAt().
+     * @todo   Implement testAddAtUniqe().
      */
     public function testAddAtUniqe()
     {
@@ -232,8 +279,8 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Fobia\ObjectCollection::find
-     * @todo   Implement testFind().
+     * @covers Fobia\ObjectCollection::filter
+     * @todo   Implement testFilter().
      */
     public function testFilter()
     {
@@ -269,10 +316,20 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($obj,     $this->object->eq());
     }
 
+    /**
+     * @covers Fobia\ObjectCollection::filter
+     * @todo   Implement testFilterError()
+     * @expectedException \Exception
+     */
+//    public function testFilterError()
+//    {
+//        $this->setErrorHandler();
+//        $this->object->filter("no-callback");
+//    }
 
     /**
      * @covers Fobia\ObjectCollection::find
-     * @todo   Implement testFind().
+     * @todo   Implement testFindProperty().
      */
     public function testFindProperty()
     {
@@ -293,7 +350,10 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($obj, $resultFind->eq());
     }
 
-
+    /**
+     * @covers Fobia\ObjectCollection::find
+     * @todo   Implement testFindValue().
+     */
     public function testFindValue()
     {
         $this->object->addAt(new ObjectItem('new_1', 1));
@@ -314,6 +374,10 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('find', $this->object->eq(2)->key);
     }
 
+    /**
+     * @covers Fobia\ObjectCollection::find
+     * @todo   Implement testFindCallback().
+     */
     public function testFindCallback()
     {
         $this->object->addAt(new ObjectItem('new_1', 1));
@@ -332,7 +396,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('new_1', $resultFind->eq(0)->name);
         $this->assertEquals($this->object->eq(2), $resultFind->eq(1));
     }
-
 
     /**
      * @covers Fobia\ObjectCollection::set
@@ -391,18 +454,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals($key, $value['key']);
         }
     }
-
-    /**
-     * @covers Fobia\ObjectCollection::merge
-     * @todo   Implement testMerge().
-     */
-//    public function testMerge()
-//    {
-//        // Remove the following lines when you implement this test.
-//        $this->markTestIncomplete(
-//          'This test has not been implemented yet.'
-//        );
-//    }
 
     /**
      * @covers Fobia\ObjectCollection::removeAt
@@ -468,7 +519,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::each
-     * @todo   Implement testEach().
+     * @todo   Implement testEachCallback().
      */
     public function testEachCallback()
     {
@@ -484,6 +535,27 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         
         $this->assertEquals("each", $this->object->eq()->name);
         $this->assertEquals("new_1", $this->object->eq(1)->name);
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::each
+     * @todo   Implement testEachError().
+     * @expectedException \Exception
+     */
+    public function testEachError()
+    {
+        $level = error_reporting(0);
+        set_error_handler(function($errno) {
+            if ($errno == E_USER_ERROR) {
+                throw new \Exception("Error", $errno);
+            }
+            return false;
+        });
+
+        $this->object->each("no-callback");
+
+        restore_error_handler();
+        error_reporting($level);
     }
 
     /**
@@ -505,6 +577,8 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
             return ($a->key != 4);
         });
         $this->assertEquals(4, $this->object->eq()->key);
+
+        $this->object->sort(array(1));
     }
 
     /**
@@ -543,8 +617,10 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('object', $arr[0]);
     }
 
-
-
+    /**
+     * @covers Fobia\ObjectCollection::unique
+     * @todo   Implement testUnique().
+     */
     public function testUnique()
     {
         $obj = new ObjectItem('add-1');
@@ -563,6 +639,10 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(2, $this->object);
     }
 
+    /**
+     * @covers Fobia\ObjectCollection::merge
+     * @todo   Implement testMerge().
+     */
     public function testMerge()
     {
         $obj = new ObjectItem('add-1');
@@ -580,18 +660,4 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(2, $this->object);
     }
 
-
-    public function testArrayParametr()
-    {
-        $collection = new ObjectCollection();
-        $collection->addAt(array('n' => 1));
-        $collection->addAt(array('n' => 2));
-        $collection->addAt(array('n' => 3));
-        $collection->addAt(array('n' => 4));
-        $this->assertCount(4, $collection);
-
-        $collection->addAt(array('n' => 4));
-        $collection->addAt(array('n' => 4));
-        $collection->unique(false);
-    }
 }
