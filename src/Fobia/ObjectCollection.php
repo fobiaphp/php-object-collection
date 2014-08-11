@@ -153,10 +153,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     public function filter($callback)
     {
-        if ( ! is_callable($callback)) {
-            trigger_error("CORE: Параметр не является функцией обратного вызова.",
-                          E_USER_ERROR);
-        }
+        is_callable($callback) or  trigger_error("CORE: Параметр не является функцией обратного вызова.", E_USER_ERROR);
 
         $args = func_get_args();
         array_shift($args);
@@ -352,10 +349,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     public function each($callback, $args = null)
     {
-        if ( ! is_callable($callback)) {
-            trigger_error("CORE: Параметр не является функцией обратного вызова.",
-                          E_USER_ERROR);
-        }
+        is_callable($callback) or trigger_error("CORE: Параметр не является функцией обратного вызова.", E_USER_ERROR);
 
         foreach ($this->data as $key => $obj) {
             if (call_user_func_array($callback, array($obj, $key, $args)) === false) {
