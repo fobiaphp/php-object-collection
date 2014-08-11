@@ -395,7 +395,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             usort($this->data, $this->_sort_property($param));
         } else {
             if ( is_callable($param) ) {
-                usort($this->data, $param);
+                usort($this->data, $this->_sort_callable($param, $args));
             } else {
                 trigger_error("Плохой параметр сортировки", E_USER_WARNING);
                 // usort($this->data, $this->_sort_property());
@@ -405,6 +405,30 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         return $this;
     }
 
+    /**
+     * Сортировка по свойству
+     *
+     * @param string $key
+     * @return int
+     */
+    protected function _sort_property($key = null)
+    {
+        if ( ! $key ) 
+            trigger_error("Плохой параметр сортировки", E_USER_WARNING);
+
+        return function($a, $b) use($key) {
+            return strnatcmp($a->$key, $b->$key);
+        };
+    }
+
+    /**
+     *
+     * @param callable $callable
+     * @param mixed $args
+     * @return callable
+     *
+     * @codeCoverageIgnore
+     */
     protected function _sort_callable($callable, $args = null)
     {
         return function($a, $b) use($callable, $args) {
@@ -427,21 +451,6 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         return $this->_count;
     }
 
-    /**
-     * Сортировка по свойству
-     *
-     * @param string $key
-     * @return int
-     */
-    protected function _sort_property($key = null)
-    {
-        if ( ! $key ) {
-            return 0;
-        }
-        return function($a, $b) use($key) {
-            return strnatcmp($a->$key, $b->$key);
-        };
-    }
     /**
      * ---------------------------
      *

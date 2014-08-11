@@ -132,6 +132,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     
     /**
      * @covers Fobia\ObjectCollection::__construct
+     * @covers Fobia\ObjectCollection::_resor
      * @todo   Implement testConstruct().
      */
     public function testConstruct()
@@ -584,6 +585,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::sort
+     * @covers Fobia\ObjectCollection::_sort_property
      * @todo   Implement testSort().
      */
     public function testSort()
@@ -605,10 +607,23 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::sort
+     * @covers Fobia\ObjectCollection::_sort_property
+     * @todo   Implement testSort().
+     * @expectedException \Exception
+     */
+    public function testSortError1()
+    {
+        $this->setErrorHandler(E_USER_WARNING);
+        $this->object->sort('');
+        $this->restoreErrorHandler();
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::sort
      * @todo   Implement testSortError()
      * @expectedException \Exception
      */
-    public function testSortError()
+    public function testSortError2()
     {
         $this->setErrorHandler(E_USER_WARNING);
         $this->object->sort(array(1));
@@ -695,4 +710,15 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(2, $this->object);
     }
 
+    /**
+     * @covers Fobia\ObjectCollection::merge
+     * @todo   Implement testMergeObject().
+     */
+    public function testMergeObject()
+    {
+        $obj = new ObjectItem('add-1');
+        $this->object->merge($obj);
+
+        $this->assertCount(2, $this->object);
+    }
 }
