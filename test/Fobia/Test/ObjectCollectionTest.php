@@ -416,6 +416,22 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers Fobia\ObjectCollection::find
+     * @todo   Implement testFindValueCallback().
+     */
+    public function testFindValueCallback()
+    {
+        $object = $this->createObjectCollection(5);
+        $resultFind = $object->find('key', function($value, $obj) {
+            if ($value > 3) {
+                return true;
+            }
+        });
+        $this->assertCount(1, $resultFind);
+        $this->assertEquals('name_4', $resultFind->eq()->name);
+    }
+
+    /**
      * @covers Fobia\ObjectCollection::set
      * @todo   Implement testSet().
      */
