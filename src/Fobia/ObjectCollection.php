@@ -397,7 +397,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             if ( is_callable($param) ) {
                 usort($this->data, $param);
             } else {
-                usort($this->data, $this->_sort_property($param));
+                trigger_error("Плохой параметр сортировки", E_USER_WARNING);
+                // usort($this->data, $this->_sort_property());
             }
         }
 

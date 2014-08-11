@@ -56,6 +56,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      * @var \Fobia\ObjectCollection
      */
     protected $object;
+    protected $handler_error_level;
 
     protected function newItem($key1)
     {
@@ -87,17 +88,23 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         return $objectCollection;
     }
 
-
-    protected function setErrorHandler()
+    protected function setErrorHandler($errno_level = 256)
     {
-        set_error_handler(function($errno) {
-            if ($errno == E_USER_ERROR) {
-                throw new \Exception("Error", $errno);
+        $this->handler_error_level = error_reporting(0);
+        set_error_handler(function($errno) use ($errno_level) {
+            if (!($errno & $errno_level)) {
+                return;
             }
-            return false;
+            throw new \Exception("Error", $errno);
         });
     }
 
+    protected function restoreErrorHandler()
+    {
+        restore_error_handler();
+        error_reporting($this->handler_error_level);
+        $this->handler_error_level = null;
+    }
 
     /**
      * Sets up the fixture, for example, opens a network connection.
@@ -106,6 +113,17 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->object = new ObjectCollection(array(new ObjectItem()));
+    }
+
+    /**
+     * Tears down the fixture, for example, closes a network connection.
+     * This method is called after a test is executed.
+     */
+    protected function tearDown()
+    {
+        if ($this->handler_error_level !== null) {
+            $this->restoreErrorHandler();
+        }
     }
 
     /*************************************************************************
@@ -323,8 +341,8 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
 //    public function testFilterError()
 //    {
-//        $this->setErrorHandler();
-//        $this->object->filter("no-callback");
+        //$this->setErrorHandler();
+        //$this->object->filter("no-callback");
 //    }
 
     /**
@@ -542,21 +560,11 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      * @todo   Implement testEachError().
      * @expectedException \Exception
      */
-    public function testEachError()
-    {
-        $level = error_reporting(0);
-        set_error_handler(function($errno) {
-            if ($errno == E_USER_ERROR) {
-                throw new \Exception("Error", $errno);
-            }
-            return false;
-        });
-
-        $this->object->each("no-callback");
-
-        restore_error_handler();
-        error_reporting($level);
-    }
+//    public function testEachError()
+//    {
+        //$this->setErrorHandler();
+        //$this->object->each("no-callback");
+//    }
 
     /**
      * @covers Fobia\ObjectCollection::sort
@@ -577,9 +585,20 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
             return ($a->key != 4);
         });
         $this->assertEquals(4, $this->object->eq()->key);
-
-        $this->object->sort(array(1));
     }
+
+    /**
+     * @covers Fobia\ObjectCollection::sort
+     * @todo   Implement testSortError()
+     * @expectedException \Exception
+     */
+    public function testSortError()
+    {
+        $this->setErrorHandler(E_USER_WARNING);
+        $this->object->sort(array(1));
+        $this->restoreErrorHandler();
+    }
+
 
     /**
      * @covers Fobia\ObjectCollection::count
