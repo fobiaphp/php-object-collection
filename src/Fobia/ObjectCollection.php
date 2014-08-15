@@ -33,8 +33,8 @@ namespace Fobia;
 /**
  * ObjectCollection
  *
+ * @author   Dmitriy Tyurin <fobia3d@gmail.com>
  * @package  Fobia
- * @author   Dmitriy Tyurin
  */
 class ObjectCollection implements \IteratorAggregate, \Countable
 {
@@ -51,8 +51,10 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * @internal
      */
-    public function __construct(array $data = array())
+    public function __construct(array $data = array(), $unique = false)
     {
+        $this->_unique = $unique;
+
         if (count($data)) {
             $this->merge($data);
         }
@@ -175,7 +177,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Возвращает индекс объекта в колекции
      *
      * @param mixed   $object
-     * @param boolean $strict
+     * @param boolean $strict точное совпадение объекта
      * @return array
      */
     public function index($object, $strict = true)
@@ -413,7 +415,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     protected function _sort_property($key = null)
     {
-        if ( ! $key ) 
+        if ( ! $key )
             trigger_error("Плохой параметр сортировки", E_USER_WARNING);
 
         return function($a, $b) use($key) {
