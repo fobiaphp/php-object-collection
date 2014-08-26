@@ -31,10 +31,11 @@
 namespace Fobia;
 
 /**
- * ObjectCollection
+ * Колекция объектов. Позволяет работать сразу над всеми объектами, фильтравать, устанавливать и извлекать их свойства.
+ *
  *
  * @package  Fobia
- * @author   Dmitriy Tyurin
+ * @author   Dmitriy Tyurin <fobia3d@gmail.com>
  */
 class ObjectCollection implements \IteratorAggregate, \Countable
 {
@@ -203,17 +204,61 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Выбрать значения свойсвта из списка.
      *
+     * Вернет список определеного поля
+     * get('login')
+     *
+     * Вернет список масивов полей
+     * get(array('login', 'password'))
+     *
+     * Вернет ассоциативный массив, где ключом являеться первый аргумент,
+     * а значения поля объектов, сформированых из второго аргумента
+     * get('key', 'login')
+     * get('key', array('login', 'password')
+     *
      * @param string $name
      * @return array
      */
-    public function get($name)
+    public function get($name, $fields = null)
     {
         $data = array();
-        foreach ($this->data as $obj) {
-            $data[] = $obj->$name;
+
+        // список масивов полей
+        if (is_array($name)) {
+            foreach ($this->data as $obj) {
+                $item = array();
+                foreach ($name as $key) {
+                    $item[$key] = $obj->$key;
+                }
+                $data[] = $item;
+            }
+            return $data;
         }
 
-        return $data;
+        // список определеного поля
+        if ($fields === null) {
+            foreach ($this->data as $obj) {
+                $data[] = $obj->$name;
+            }
+            return $data;
+        }
+
+        // ассоциативный массив полей по ключу
+        if (is_array($fields)) {
+            foreach ($this->data as $obj) {
+                $item = array();
+                foreach ($fields as $key) {
+                    $item[$key] = $obj->$key;
+                }
+                $data[$obj->$name] = $item;
+            }
+            return $data;
+        } else {
+            // ассоциативный массив полея
+            foreach ($this->data as $obj) {
+                $data[$obj->$name] = $obj->$fields;
+            }
+            return $data;
+        }
     }
 
     /**
@@ -352,8 +397,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         is_callable($callback) or trigger_error("CORE: Параметр не является функцией обратного вызова.", E_USER_ERROR);
 
         foreach ($this->data as $key => $obj) {
-            if (call_user_func_array($callback, array($obj, $key, $args)) === false) {
-            // if ($callback($obj, $key, $args) === false) {
+            // if (call_user_func_array($callback, array($obj, $key, $args)) === false) {
+            if ($callback($obj, $key, $args) === false) {
                 break;
             }
         }
@@ -364,7 +409,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Устанавливает только уникальные элементы
      *
-     * @return \self
+     * @return self
      */
     public function unique($strict = true)
     {
@@ -413,7 +458,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     protected function _sort_property($key = null)
     {
-        if ( ! $key ) 
+        if ( ! $key )
             trigger_error("Плохой параметр сортировки", E_USER_WARNING);
 
         return function($a, $b) use($key) {

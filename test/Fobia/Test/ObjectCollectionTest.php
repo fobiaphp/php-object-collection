@@ -129,7 +129,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     /*************************************************************************
      * TEST FUNCTION
      *************************************************************************/
-    
+
     /**
      * @covers Fobia\ObjectCollection::__construct
      * @covers Fobia\ObjectCollection::_resor
@@ -469,6 +469,63 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers Fobia\ObjectCollection::get
+     * @todo   Implement testGet().
+     */
+    public function testGetWhithArray()
+    {
+        $objects = $this->createObjectCollection(5);
+
+        $arr = array(
+            array('name' => 'name_0', 'key' => 0),
+            array('name' => 'name_1', 'key' => 1),
+            array('name' => 'name_2', 'key' => 2),
+            array('name' => 'name_3', 'key' => 3),
+            array('name' => 'name_4', 'key' => 4),
+        );
+        $get = $objects->get(array('name', 'key'));
+        $this->assertSame ($arr, $get);
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::get
+     * @todo   Implement testGet().
+     */
+    public function testGetWhithKeyname()
+    {
+        $objects = $this->createObjectCollection(5);
+
+        $arr = array(
+            'name_0'  => 0,
+            'name_1'  => 1,
+            'name_2'  => 2,
+            'name_3'  => 3,
+            'name_4'  => 4,
+        );
+        $get = $objects->get('name', 'key');
+
+        $this->assertSame($arr, $objects->get('name', 'key'));
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::get
+     * @todo   Implement testGet().
+     */
+    public function testGetWhithKeynameForArray()
+    {
+        $objects = $this->createObjectCollection(5);
+
+        $arr = array(
+            'name_0' => array('name' => 'name_0', 'key' => 0),
+            'name_1' => array('name' => 'name_1', 'key' => 1),
+            'name_2' => array('name' => 'name_2', 'key' => 2),
+            'name_3' => array('name' => 'name_3', 'key' => 3),
+            'name_4' => array('name' => 'name_4', 'key' => 4),
+        );
+        $this->assertSame($arr, $objects->get( 'name', array('name', 'key') ));
+    }
+
+    /**
      * @covers Fobia\ObjectCollection::getArr
      * @todo   Implement testGetArr().
      */
@@ -567,7 +624,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
             $obj->name = "each";
             return false;
         });
-        
+
         $this->assertEquals("each", $this->object->eq()->name);
         $this->assertEquals("new_1", $this->object->eq(1)->name);
     }
