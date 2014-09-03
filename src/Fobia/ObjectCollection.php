@@ -101,30 +101,24 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * e.g `find('Location', 'localhost/js');`
      *
      * ### Поиск объектов удавлетворяющие возврату функции
-     * e.g `find('Location', function($name_value, $obj, $args), $args);`
+     * e.g `find(function($obj, $key));`
      *
-     * ### Поиск объектов удавлетворяющие возврату функции
-     * e.g `find(function($obj, $args...),  $args, ...);`
-     *
-     * @param string   $name       название свойства
-     * @param mixed    $param      его значение или функция обратного вызова.
-     *                             в функцию передаеться [значение поля, оъект, $args]
-     * @param mixed    $args       дополнительные параметры, переданные в функцию
-     *                             обратного вызова.
+     * @param string   $name       название свойства или функция обратного вызова.
+     *                             в функцию передаеться [оъект, его индекс]
+     * @param mixed    $value      его значение, если $name строка
      * @return \Fobia\ObjectCollection  колекция найденных объектов.
      *
      * @api
      */
-    public function find($name, $param = null, $args = null)
+    public function find($name, $value = null)
     {
         $data = array();
 
+        // Функция пользователя
         if (!is_string($name) && is_callable($name)) {
-            $args = func_get_args();
-            array_shift($args);
-
-            foreach ($this->data as $obj) {
-                if (call_user_func_array($name, array_merge(array($obj), $args) ) ){
+            $callback = $name;
+            foreach ($this->data as $key => $obj) {
+                if ( $callback($obj, $key) ){
                     $data[] = $obj;
                 }
             }
@@ -140,20 +134,11 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             }
         }
 
+        // Сравнение свойства
         if (func_num_args() > 1) {
-            //$args = func_get_args();
-            //$args = $args[2];
-            // Сравнение свойства
             foreach ($this->data as $obj) {
-                // Функция обратного вызова
-                if (is_callable($param)) {
-                    if ($param($obj->$name, $obj, $args)) {
-                        $data[] = $obj;
-                    }
-                } else {
-                    if ($obj->$name == $param) {
-                        $data[] = $obj;
-                    }
+                if ($obj->$name == $value) {
+                    $data[] = $obj;
                 }
             }
         }

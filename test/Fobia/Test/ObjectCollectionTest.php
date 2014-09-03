@@ -336,7 +336,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::find
-     * @todo   Implement testFindProperty().
      */
     public function testFindProperty()
     {
@@ -359,7 +358,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::find
-     * @todo   Implement testFindValue().
      */
     public function testFindValue()
     {
@@ -383,7 +381,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::find
-     * @todo   Implement testFindCallback().
      */
     public function testFindCallback()
     {
@@ -392,32 +389,15 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->object->addAt(new Item('new_2', 3));
         $this->object->addAt(new Item('new_3', 4));
 
-        $resultFind = $this->object->find(function($obj, $key, $value) {
-            if ($obj->$key == $value) {
+        $resultFind = $this->object->find(function($obj, $key) {
+            if ($obj->name == 'new_1') {
                 return true;
             }
-        },
-        'name', 'new_1' );
+        });
 
         $this->assertCount(2, $resultFind);
         $this->assertEquals('new_1', $resultFind->eq(0)->name);
         $this->assertEquals($this->object->eq(2), $resultFind->eq(1));
-    }
-
-    /**
-     * @covers Fobia\ObjectCollection::find
-     * @todo   Implement testFindValueCallback().
-     */
-    public function testFindValueCallback()
-    {
-        $object = $this->createObjectCollection(5);
-        $resultFind = $object->find('key', function($value, $obj) {
-            if ($value > 3) {
-                return true;
-            }
-        });
-        $this->assertCount(1, $resultFind);
-        $this->assertEquals('name_4', $resultFind->eq()->name);
     }
 
     /**
@@ -575,26 +555,22 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testEach()
     {
-        $this->object->addAt(new Item('new_4', 1));
-        $this->object->addAt(new Item('new_3', 2));
-        $this->object->addAt(new Item('new_2', 3));
-        $this->object->addAt(new Item('new_1', 4));
+        $collection = new ObjectCollection(array(
+            new Item('new_4', 1),
+            new Item('new_3', 2),
+            new Item('new_2', 3),
+            new Item('new_1', 4),
+        ));
 
         $self = & $this;
 
-        $this->object->each(function($obj, $index) use ($self) {
-            // $self->assertEquals($self->object->eq($index), $obj);
+        $collection->each(function($obj) {
             $obj->each = true;
         });
 
-        foreach ($this->object as $obj) {
+        foreach ($collection as $obj) {
             $self->assertTrue($obj->each);
         }
-
-        $findResult = $this->object->find('key', function($key) {
-             return ($key > 2);
-        });
-        $self->assertCount(2, $findResult);
     }
 
     /**
