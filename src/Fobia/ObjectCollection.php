@@ -390,6 +390,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Устанавливает только уникальные элементы
      *
+     * @param bool $strict строгое равенство для объектов
      * @return self
      */
     public function unique($strict = true)
