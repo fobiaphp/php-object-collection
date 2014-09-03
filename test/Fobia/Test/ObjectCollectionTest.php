@@ -400,7 +400,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::set
-     * @todo   Implement testSet().
      */
     public function testSet()
     {
@@ -415,20 +414,17 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::get
-     * @todo   Implement testGet().
      */
     public function testGet()
     {
-        $obj1 = new Item(1);
-        $obj2 = new Item(2);
-        $obj3 = new Item(3);
+        $collection = new ObjectCollection(array(
+            new Item(0),
+            new Item(1),
+            new Item(2),
+            new Item(3),
+        ));
 
-        $this->object->eq()->name = 0;
-        $this->object->addAt($obj1);
-        $this->object->addAt($obj2);
-        $this->object->addAt($obj3);
-
-        $get = $this->object->get('name');
+        $get = $collection->get('name');
         foreach ($get as $key => $value) {
             $this->assertEquals($key, $value);
         }
@@ -436,7 +432,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::get
-     * @todo   Implement testGet().
      */
     public function testGetWhithArray()
     {
@@ -455,12 +450,11 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::get
-     * @todo   Implement testGet().
      */
     public function testGetWhithKeyname()
     {
         $objects = $this->createObjectCollection(5);
-
+        
         $arr = array(
             'name_0'  => 0,
             'name_1'  => 1,
@@ -468,14 +462,11 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
             'name_3'  => 3,
             'name_4'  => 4,
         );
-        $get = $objects->get('name', 'key');
-
         $this->assertSame($arr, $objects->get('name', 'key'));
     }
 
     /**
      * @covers Fobia\ObjectCollection::get
-     * @todo   Implement testGet().
      */
     public function testGetWhithKeynameForArray()
     {
@@ -492,10 +483,9 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Fobia\ObjectCollection::getArr
-     * @todo   Implement testGetArr().
+     * @covers Fobia\ObjectCollection::get
      */
-    public function testGetArr()
+    public function testGetWhithArray2()
     {
         $objects = new ObjectCollection(array(
             new Item('name_0', 0),
