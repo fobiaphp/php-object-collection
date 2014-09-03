@@ -146,7 +146,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::index
-     * @todo   Implement testIndex().
      */
     public function testIndex()
     {
@@ -287,7 +286,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::filter
-     * @todo   Implement testFilter().
      */
     public function testFilter()
     {
@@ -299,7 +297,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->object->addAt($obj);
 
         $param = 'other';
-        $this->object->filter(function($obj, $key) use ($param) {
+        $this->object->filter(function($obj) use ($param) {
             if ($obj->name === $param) {
                 return false;
             } else {
@@ -325,14 +323,14 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::filter
-     * @todo   Implement testFilterError()
      * @expectedException \Exception
      */
-//    public function testFilterError()
-//    {
-        //$this->setErrorHandler();
-        //$this->object->filter("no-callback");
-//    }
+    public function testFilterError()
+    {
+        $this->setErrorHandler(E_USER_ERROR);
+        $this->object->filter("no-callback");
+        $this->restoreErrorHandler();
+    }
 
     /**
      * @covers Fobia\ObjectCollection::find

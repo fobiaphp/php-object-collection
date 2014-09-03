@@ -161,7 +161,6 @@ class ObjectCollection implements \IteratorAggregate, \Countable
 
         $arr = array();
         foreach ($this->data as $key => $obj) {
-
             // if (call_user_func_array($callback, array($obj, $key))){
             if ($callback($obj, $key)){
                 $arr[] = $obj;
