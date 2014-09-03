@@ -94,21 +94,21 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      *
      * Возвращает новый объект
      *
-     * ### Поиск объектов с существующим свойством
-     * e.g `find('Location');`
+     * <code>
+     * // Поиск объектов с существующим свойством
+     * $oc->find('Location');
      *
-     * ### Поиск объектов со свойством равным указаному значению
-     * e.g `find('Location', 'localhost/js');`
+     * // Поиск объектов со свойством равным указаному значению
+     * $oc->find('Location', 'localhost/js');
      *
-     * ### Поиск объектов удавлетворяющие возврату функции
-     * e.g `find(function($obj, $key));`
+     * // Поиск объектов удавлетворяющие возврату функции
+     * $oc->find(function($obj, $key));
+     * </code>
      *
-     * @param string   $name       название свойства или функция обратного вызова.
-     *                             в функцию передаеться [оъект, его индекс]
-     * @param mixed    $value      его значение, если $name строка
+     * @param string|callable  $name   название свойства или функция обратного вызова.
+     *                                 в функцию передаеться [оъект, его индекс]
+     * @param mixed            $value  его значение, если $name строка
      * @return \Fobia\ObjectCollection  колекция найденных объектов.
-     *
-     * @api
      */
     public function find($name, $value = null)
     {
@@ -440,8 +440,9 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     protected function _sort_property($key = null)
     {
-        if ( ! $key )
+        if ( ! $key ) {
             trigger_error("Плохой параметр сортировки", E_USER_WARNING);
+        }
 
         return function($a, $b) use($key) {
             return strnatcmp($a->$key, $b->$key);
