@@ -40,20 +40,34 @@ namespace Fobia;
 class ObjectCollection implements \IteratorAggregate, \Countable
 {
 
-    /** @var array */
+    /**
+     * Список объектов
+     *
+     * @var array
+     */
     protected $data = array();
 
-    /** @var int */
+    /**
+     * Количество объектов
+     *
+     * @var int
+     */
     private $_count = 0;
 
-    /** @var boolean */
+    /**
+     * Флак, что все объекты уникальные
+     *
+     * @var boolean
+     */
     private $_unique = false;
 
     /**
      * @internal
      */
-    public function __construct(array $data = array())
+    public function __construct(array $data = array(), $unique = false)
     {
+        $this->_unique = $unique;
+
         if (count($data)) {
             $this->merge($data);
         }
@@ -61,7 +75,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     }
 
     /**
-     * Выбрать непосредственно экземпляр объекта.
+     * Выбрать непосредственно экземпляр объекта по его индексу.
      *
      * @param int $index индекс объекта
      * @return \stdObject
@@ -145,8 +159,9 @@ class ObjectCollection implements \IteratorAggregate, \Countable
 
     /**
      * Отфильтровать список объектов используя функции обратного вызова.
-     * В Функцию передаються объект  и его индекс.
-     * Все объекты на которые функция вернула false, исключаються
+     *
+     * В Функцию передаються объект и его индекс.
+     * Все объекты на которые функция вернула false, исключаються.
      *
      * @param callable $callback
      * @param mixed ...
@@ -176,7 +191,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Возвращает индекс объекта в колекции
      *
      * @param mixed   $object
-     * @param boolean $strict
+     * @param boolean $strict   точное совпадение объекта
      * @return array
      */
     public function index($object, $strict = true)
@@ -215,7 +230,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * get('key', 'login')
      * get('key', array('login', 'password')
      *
-     * @param string $name
+     * @param string|array $name
+     * @param string|array $fields
      * @return array
      */
     public function get($name, $fields = null)
@@ -386,6 +402,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
 
     /**
      * Обходит весь масив, передавая функции объект, его индекс и дополнительные параметры.
+     *
      * Если функция возвращает false, обход останавливаеться.
      *
      * @param callback $callback
@@ -518,7 +535,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->data);
+        return new \ArrayIterator( $this->data );
     }
 
     /**
