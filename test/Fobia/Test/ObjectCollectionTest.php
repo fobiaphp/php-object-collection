@@ -575,7 +575,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::each
-     * @todo   Implement testEachCallback().
      */
     public function testEachCallback()
     {
@@ -595,14 +594,14 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::each
-     * @todo   Implement testEachError().
      * @expectedException \Exception
      */
-//    public function testEachError()
-//    {
-        //$this->setErrorHandler();
-        //$this->object->each("no-callback");
-//    }
+    public function testEachError()
+    {
+        $this->setErrorHandler(E_USER_ERROR);
+        $this->object->each("no-callback");
+        $this->restoreErrorHandler();
+    }
 
     /**
      * @covers Fobia\ObjectCollection::sort
