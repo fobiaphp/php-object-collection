@@ -539,7 +539,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::each
-     * @todo   Implement testEach().
      */
     public function testEach()
     {
@@ -616,7 +615,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     /**
      * @covers Fobia\ObjectCollection::sort
      * @covers Fobia\ObjectCollection::_sort_property
-     * @todo   Implement testSort().
+     * @todo   Implement testSortError1().
      * @expectedException \Exception
      */
     public function testSortError1()
@@ -641,7 +640,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::count
-     * @todo   Implement testCount().
      */
     public function testCount()
     {
@@ -651,7 +649,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::getIterator
-     * @todo   Implement testGetIterator().
      */
     public function testGetIterator()
     {
@@ -666,7 +663,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::toArray
-     * @todo   Implement testToArray().
      */
     public function testToArray()
     {
