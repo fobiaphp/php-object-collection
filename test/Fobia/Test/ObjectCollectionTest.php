@@ -1,77 +1,46 @@
 <?php
 /**
- * PHP Object Collection
+ * CollectionTest class  - CollectionTest.php file
  *
- * @author      Dmitriy Tyurin <fobia3d@gmail.com>
- * @copyright   Copyright (c) 2014 Dmitriy Tyurin
- * @package     Fobia
- *
- * MIT LICENSE
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * @author     Dmitriy Tyurin <fobia3d@gmail.com>
+ * @copyright  Copyright (c) 2014 Dmitriy Tyurin
  */
 
 namespace Fobia\Test;
 
 use Fobia\ObjectCollection;
 
-class ObjectItem
+class Item
 {
+
     public $name;
     public $key;
 
-    function __construct($name = 'default', $key = null, $keyName = null, $keyValue = null)
+    function __construct($name = 'default', $key = null, $keyName = null,
+                         $keyValue = null)
     {
         $this->name = $name;
-        $this->key = $key;
+        $this->key  = $key;
 
         if ($keyName !== null) {
             $this->$keyName = $keyValue;
         }
-
     }
-
 }
 
+/**
+ * ObjectCollectionTest class
+ *
+ * @package   Fobia\Test
+ */
 class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 {
+
     /**
      * @var \Fobia\ObjectCollection
      */
     protected $object;
     protected $handler_error_level;
-
-    protected function newItem($key1)
-    {
-        $arr = array(
-            'key1' => $key1
-        );
-        $args = func_get_args();
-        array_shift($args);
-        foreach ($args as $k => $v) {
-            $k = $k +2;
-            $k = 'key'. $k;
-            $arr[$k] = $v;
-        }
-        return $arr;
-    }
 
     /**
      *
@@ -83,7 +52,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $objectCollection = new ObjectCollection();
 
         for ($index = 0; $index < $count; $index ++ ) {
-            $objectCollection->addAt(new ObjectItem("name_$index", $index));
+            $objectCollection->addAt(new Item("name_$index", $index));
         }
         return $objectCollection;
     }
@@ -92,7 +61,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     {
         $this->handler_error_level = error_reporting(0);
         set_error_handler(function($errno) use ($errno_level) {
-            if (!($errno & $errno_level)) {
+            if ( ! ($errno & $errno_level)) {
                 return;
             }
             throw new \Exception("Error", $errno);
@@ -112,7 +81,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->object = new ObjectCollection(array(new ObjectItem()));
+        $this->object = new ObjectCollection(array(new Item()));
     }
 
     /**
@@ -125,35 +94,54 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
             $this->restoreErrorHandler();
         }
     }
-
-    /*************************************************************************
+    /*     * ***********************************************************************
      * TEST FUNCTION
-     *************************************************************************/
+     * *********************************************************************** */
 
     /**
      * @covers Fobia\ObjectCollection::__construct
      * @covers Fobia\ObjectCollection::_resor
-     * @todo   Implement testConstruct().
      */
-    public function testConstruct()
+    public function testConstruct1()
     {
-        $object = new ObjectCollection();
-        $this->assertInstanceOf('\Fobia\ObjectCollection', $object);
+        $collection = new ObjectCollection();
+        $this->assertInstanceOf('Fobia\ObjectCollection', $collection);
+        $this->assertEquals(0, $collection->count());
+    }
 
-        $object = new ObjectCollection(array(
-            new ObjectItem('new')
-        ));
-        $this->assertInstanceOf('\Fobia\ObjectCollection', $object);
+    /**
+     * @covers Fobia\ObjectCollection::__construct
+     * @covers Fobia\ObjectCollection::_resor
+     */
+    public function testConstruct2()
+    {
+        $arr        = array(
+            array('name' => 'o_1'),
+            array('name' => 'o_1'),
+            array('name' => 'o_1'),
+        );
+        $collection = new ObjectCollection($arr);
+        $this->assertInstanceOf('Fobia\ObjectCollection', $collection);
+        $this->assertEquals(3, $collection->count());
     }
 
     /**
      * @covers Fobia\ObjectCollection::eq
-     * @todo   Implement testEq().
      */
     public function testEq()
     {
-        $obj = $this->object->eq();
-        $this->assertEquals('default', $obj->name);
+        $item0 = new Item();
+        $item1 = new Item();
+        $item2 = new Item();
+
+        $collection = new ObjectCollection(array(
+            $item0, $item1, $item2
+        ));
+
+        $this->assertEquals($item0, $collection->eq());
+        $this->assertEquals($item0, $collection->eq(0));
+        $this->assertEquals($item1, $collection->eq(1));
+        $this->assertNull(@$collection->eq(3));
     }
 
     /**
@@ -166,7 +154,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $k = $this->object->index($obj);
         $this->assertEquals(0, $k[0]);
 
-        $obj1 = new ObjectItem('new');
+        $obj1 = new Item('new');
         $this->object->addAt($obj1);
         $k = $this->object->index($obj1);
         $this->assertEquals(1, $k[0]);
@@ -178,7 +166,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddAtDefault()
     {
-        $obj = new ObjectItem('new');
+        $obj = new Item('new');
         $this->object->addAt($obj);
 
         $this->assertEquals(2, $this->object->count());
@@ -209,7 +197,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddAtFirst()
     {
-        $obj = new ObjectItem('new');
+        $obj = new Item('new');
 
         $this->object->addAt($obj, 0);
         $this->assertEquals(2, $this->object->count());
@@ -222,13 +210,13 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddAtOther()
     {
-        $obj = new ObjectItem('new');
+        $obj = new Item('new');
         $this->object->addAt($obj, 7);
 
         $this->assertEquals(2, $this->object->count());
         $this->assertEquals($obj, $this->object->eq(1));
 
-        $obj2 = new ObjectItem('new 2');
+        $obj2 = new Item('new 2');
         $this->object->addAt($obj2, 1);
 
         $this->assertEquals(3, $this->object->count());
@@ -247,25 +235,25 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     {
         $collection = new ObjectCollection();
         for ($index = 0; $index <= 10; $index ++ ) {
-            $collection->addAt(new ObjectItem('new-' . $index));
+            $collection->addAt(new Item('new-' . $index));
         }
         $this->assertCount(11, $collection);
 
-        $collection->addAt(new ObjectItem('add'), 2);
+        $collection->addAt(new Item('add'), 2);
         $this->assertCount(12, $collection);
         $this->assertEquals('new-1', $collection->eq(1)->name);
         $this->assertEquals('add', $collection->eq(2)->name);
         $this->assertEquals('new-2', $collection->eq(3)->name);
         $collection->removeAt(2);
 
-        $collection->addAt(new ObjectItem('add'), -1);
+        $collection->addAt(new Item('add'), -1);
         $this->assertCount(12, $collection);
         $this->assertEquals('new-9', $collection->eq(9)->name);
         $this->assertEquals('add', $collection->eq(10)->name);
         $this->assertEquals('new-10', $collection->eq(11)->name);
         $collection->removeAt(10);
 
-        $collection->addAt(new ObjectItem('add'), 99);
+        $collection->addAt(new Item('add'), 99);
         $this->assertCount(12, $collection);
         $this->assertEquals('new-1', $collection->eq(1)->name);
         $this->assertEquals('new-10', $collection->eq(10)->name);
@@ -280,7 +268,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     {
         $collection = new ObjectCollection();
         for ($index = 1; $index <= 10; $index ++ ) {
-            $collection->addAt(new ObjectItem('new-' . $index));
+            $collection->addAt(new Item('new-' . $index));
         }
         $collection->unique();
         $this->assertCount(10, $collection);
@@ -303,21 +291,21 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testFilter()
     {
-        $this->object->addAt(new ObjectItem('new_1'));
-        $this->object->addAt(new ObjectItem('new_2'));
-        $this->object->addAt(new ObjectItem('new_3'));
+        $this->object->addAt(new Item('new_1'));
+        $this->object->addAt(new Item('new_2'));
+        $this->object->addAt(new Item('new_3'));
 
-        $obj = new ObjectItem('other');
+        $obj = new Item('other');
         $this->object->addAt($obj);
 
         $param = 'other';
-        $this->object->filter(function($obj, $key, $param) {
+        $this->object->filter(function($obj, $key) use ($param) {
             if ($obj->name === $param) {
                 return false;
             } else {
                 return true;
             }
-        }, $param);
+        });
 
         $this->assertCount(4, $this->object);
 
@@ -352,11 +340,11 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testFindProperty()
     {
-        $this->object->addAt(new ObjectItem('new_1'));
-        $this->object->addAt(new ObjectItem('new_2'));
-        $this->object->addAt(new ObjectItem('new_3'));
+        $this->object->addAt(new Item('new_1'));
+        $this->object->addAt(new Item('new_2'));
+        $this->object->addAt(new Item('new_3'));
 
-        $obj = new ObjectItem('other');
+        $obj = new Item('other');
         $obj->otherKey = 17;
         $this->object->addAt($obj);
 
@@ -375,10 +363,10 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testFindValue()
     {
-        $this->object->addAt(new ObjectItem('new_1', 1));
-        $this->object->addAt(new ObjectItem('new_1', 2));
-        $this->object->addAt(new ObjectItem('new_2', 3));
-        $this->object->addAt(new ObjectItem('new_3', 4));
+        $this->object->addAt(new Item('new_1', 1));
+        $this->object->addAt(new Item('new_1', 2));
+        $this->object->addAt(new Item('new_2', 3));
+        $this->object->addAt(new Item('new_3', 4));
 
         $resultFind = $this->object->find('name', 'new_1');
         $this->assertCount(2, $resultFind);
@@ -399,10 +387,10 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testFindCallback()
     {
-        $this->object->addAt(new ObjectItem('new_1', 1));
-        $this->object->addAt(new ObjectItem('new_1', 2));
-        $this->object->addAt(new ObjectItem('new_2', 3));
-        $this->object->addAt(new ObjectItem('new_3', 4));
+        $this->object->addAt(new Item('new_1', 1));
+        $this->object->addAt(new Item('new_1', 2));
+        $this->object->addAt(new Item('new_2', 3));
+        $this->object->addAt(new Item('new_3', 4));
 
         $resultFind = $this->object->find(function($obj, $key, $value) {
             if ($obj->$key == $value) {
@@ -439,7 +427,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     public function testSet()
     {
         // Remove the following lines when you implement this test.
-        $this->object->addAt(new ObjectItem());
+        $this->object->addAt(new Item());
 
         $this->object->set('key', 'set value');
         foreach ($this->object as $obj) {
@@ -453,9 +441,9 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testGet()
     {
-        $obj1 = new ObjectItem(1);
-        $obj2 = new ObjectItem(2);
-        $obj3 = new ObjectItem(3);
+        $obj1 = new Item(1);
+        $obj2 = new Item(2);
+        $obj3 = new Item(3);
 
         $this->object->eq()->name = 0;
         $this->object->addAt($obj1);
@@ -532,13 +520,13 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     public function testGetArr()
     {
         $objects = new ObjectCollection(array(
-            new ObjectItem('name_0', 0),
-            new ObjectItem('name_1', 1),
-            new ObjectItem('name_2', 2),
-            new ObjectItem('name_3', 3),
+            new Item('name_0', 0),
+            new Item('name_1', 1),
+            new Item('name_2', 2),
+            new Item('name_3', 3),
         ));
 
-        $get = $objects->getArr('name', 'key');
+        $get = $objects->get(array('name', 'key'));
 
         $this->assertInternalType('array', $get);
         foreach ($get as $key => $value) {
@@ -553,7 +541,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testRemoveAt()
     {
-        $foo = new ObjectItem('foo');
+        $foo = new Item('foo');
         $this->object->addAt($foo);
         $this->assertCount(2, $this->object);
 
@@ -573,7 +561,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testRemove()
     {
-        $foo = new ObjectItem('foo');
+        $foo = new Item('foo');
         $this->object->addAt($foo);
 
         $this->object->remove($foo);
@@ -587,10 +575,10 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testEach()
     {
-        $this->object->addAt(new ObjectItem('new_4', 1));
-        $this->object->addAt(new ObjectItem('new_3', 2));
-        $this->object->addAt(new ObjectItem('new_2', 3));
-        $this->object->addAt(new ObjectItem('new_1', 4));
+        $this->object->addAt(new Item('new_4', 1));
+        $this->object->addAt(new Item('new_3', 2));
+        $this->object->addAt(new Item('new_2', 3));
+        $this->object->addAt(new Item('new_1', 4));
 
         $self = & $this;
 
@@ -615,10 +603,10 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testEachCallback()
     {
-        $this->object->addAt(new ObjectItem('new_1', 1));
-        $this->object->addAt(new ObjectItem('new_2', 2));
-        $this->object->addAt(new ObjectItem('new_3', 3));
-        $this->object->addAt(new ObjectItem('new_4', 4));
+        $this->object->addAt(new Item('new_1', 1));
+        $this->object->addAt(new Item('new_2', 2));
+        $this->object->addAt(new Item('new_3', 3));
+        $this->object->addAt(new Item('new_4', 4));
 
         $this->object->each(function($obj) {
             $obj->name = "each";
@@ -647,10 +635,10 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testSort()
     {
-        $this->object->addAt(new ObjectItem('new_1', 4));
-        $this->object->addAt(new ObjectItem('new_3', 2));
-        $this->object->addAt(new ObjectItem('new_2', 3));
-        $this->object->addAt(new ObjectItem('new_4', 1));
+        $this->object->addAt(new Item('new_1', 4));
+        $this->object->addAt(new Item('new_3', 2));
+        $this->object->addAt(new Item('new_2', 3));
+        $this->object->addAt(new Item('new_4', 1));
         $this->object->eq()->key = 1000;
 
         $this->object->sort('key');
@@ -730,7 +718,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testUnique()
     {
-        $obj = new ObjectItem('add-1');
+        $obj = new Item('add-1');
         $this->object->addAt($obj);
         $this->object->addAt($obj);
         $this->object->addAt($obj);
@@ -752,7 +740,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testMerge()
     {
-        $obj = new ObjectItem('add-1');
+        $obj = new Item('add-1');
         $collection = new ObjectCollection();
         $collection->addAt($obj);
         $collection->addAt($obj);
@@ -773,7 +761,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testMergeObject()
     {
-        $obj = new ObjectItem('add-1');
+        $obj = new Item('add-1');
         $this->object->merge($obj);
 
         $this->assertCount(2, $this->object);

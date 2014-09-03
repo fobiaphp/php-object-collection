@@ -33,6 +33,10 @@ namespace Fobia;
 /**
  * Колекция объектов. Позволяет работать сразу над всеми объектами, фильтравать, устанавливать и извлекать их свойства.
  *
+ * Все элементы преобразуются в объекты.
+ * По умолчанию список может содержать повторяющиеся объекты, а преобразованые
+ * элементы являються каждый уникальным.
+ *
  *
  * @package  Fobia
  * @author   Dmitriy Tyurin <fobia3d@gmail.com>
@@ -164,19 +168,17 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Все объекты на которые функция вернула false, исключаються.
      *
      * @param callable $callback
-     * @param mixed ...
      * @return self
      */
     public function filter($callback)
     {
         is_callable($callback) or  trigger_error("CORE: Параметр не является функцией обратного вызова.", E_USER_ERROR);
 
-        $args = func_get_args();
-        array_shift($args);
-
         $arr = array();
         foreach ($this->data as $key => $obj) {
-            if (call_user_func_array($callback, array_merge(array($obj, $key), $args))){
+
+            // if (call_user_func_array($callback, array($obj, $key))){
+            if ($callback($obj, $key)){
                 $arr[] = $obj;
             }
         }
@@ -275,29 +277,6 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             }
             return $data;
         }
-    }
-
-    /**
-     * Выбрать список значений свойсвт объектов.
-     *
-     * @param string $name
-     * @param string ...
-     * @return array
-     */
-    public function getArr($name)
-    {
-        $arr = array();
-        $names = func_get_args();
-
-        foreach ($this->data as $object) {
-            $item = array();
-            foreach ($names as $name) {
-                $item[$name] = $object->$name;
-            }
-            $arr[] = $item;
-        }
-
-        return $arr;
     }
 
     /**
