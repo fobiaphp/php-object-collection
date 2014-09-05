@@ -63,10 +63,13 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      *
      * @var boolean
      */
-    private $_unique = false;
+    private $_unique;
 
     /**
-     * @internal
+     * Конструктор.
+     * 
+     * @param array $data
+     * @param bool  $unique
      */
     public function __construct(array $data = array(), $unique = false)
     {
@@ -143,7 +146,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             }
         }
 
-        return new self($data);
+        return new self($data, $this->_unique);
     }
 
     /**

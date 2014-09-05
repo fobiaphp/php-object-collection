@@ -11,4 +11,4 @@ before_script:
 script: phpunit --coverage-text
 
 notifications:
-  email: "travis@ufac.ru"
+  email: false

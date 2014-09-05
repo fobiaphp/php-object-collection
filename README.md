@@ -28,10 +28,11 @@ for more detailed installation and usage instructions.
 
 Получить элемент по индексу
 
-    $oc->eq();  // Первый элемент
-    $oc->eq(0); // эквивалентно
-    $oc->eq(1); // Второй элемент
-
+```php
+$oc->eq();  // Первый элемент
+$oc->eq(0); // эквивалентно
+$oc->eq(1); // Второй элемент
+```
 
 #### find
 
@@ -41,23 +42,23 @@ for more detailed installation and usage instructions.
 
 Поиск объектов с существующим свойством
 
-    $oc->find('Location');
+```php
+$oc->find('Location');
+```
 
 
 Поиск объектов со свойством равным указаному значению
 
-    $oc->find('Location', 'localhost/js');
+```php
+$oc->find('Location', 'localhost/js');
+```
 
 
 Поиск объектов удавлетворяющие возврату функции
 
-    $oc->find('Location', function($name_value, $obj, $args), $args);
-
-
-Поиск объектов удавлетворяющие возврату функции
-
-    $oc->find(function($obj, $args...),  $args, ...);
-
+```php
+$oc->find(function($obj, $key) {});
+```
 
 
 #### filter
@@ -67,10 +68,11 @@ for more detailed installation and usage instructions.
 
 Отфильтрует так, что остануться те элементы, свойство ``id`` которых соответствуют индексу в колекции. Причем после фильтрации индексы сбрасываються.
 
-
-    $oc->filter(function($object, $key) {
-        return ($object->id == $key);   
-    });
+```php
+$oc->filter(function($object, $key) {
+    return ($object->id == $key);   
+});
+```
 
 
 #### each
@@ -78,4 +80,6 @@ for more detailed installation and usage instructions.
 Обходит весь масив, передавая функции объект, его индекс и дополнительные параметры. Если функция возвращает ``false``, обход останавливаеться. 
 Возвращает объект текущей колекции
 
-    $oc->each(function($object, $key) {});
+```php
+$oc->each(function($object, $key) {});
+```
