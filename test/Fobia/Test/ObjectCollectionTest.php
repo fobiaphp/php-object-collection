@@ -1,76 +1,91 @@
 <?php
 /**
- * PHP Object Collection
+ * CollectionTest class  - CollectionTest.php file
  *
- * @author      Dmitriy Tyurin <fobia3d@gmail.com>
- * @copyright   Copyright (c) 2014 Dmitriy Tyurin
- * @package     Fobia
- *
- * MIT LICENSE
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * @author     Dmitriy Tyurin <fobia3d@gmail.com>
+ * @copyright  Copyright (c) 2014 Dmitriy Tyurin
  */
 
 namespace Fobia\Test;
 
 use Fobia\ObjectCollection;
 
-class ObjectItem
+class Item
 {
+
     public $name;
     public $key;
 
-    function __construct($name = 'default', $key = null, $keyName = null, $keyValue = null)
+    function __construct($name = 'default', $key = null, $keyName = null,
+                         $keyValue = null)
     {
         $this->name = $name;
-        $this->key = $key;
+        $this->key  = $key;
 
         if ($keyName !== null) {
             $this->$keyName = $keyValue;
         }
-
     }
-
 }
 
+/**
+ * ObjectCollectionTest class
+ *
+ * @package   Fobia\Test
+ */
 class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 {
+
     /**
      * @var \Fobia\ObjectCollection
      */
     protected $object;
     protected $handler_error_level;
 
-    protected function newItem($key1)
+    const DEFAULT_COUNT = 10;
+
+    /**
+     * Создает список элементов
+     * Каждый элемент имеет
+     *  id   - порядковый номер
+     *  name - имя (на основе id)
+     *  type - типо (у всех new)
+     *  group - группа элемента (Общее кол. создаваемых элементов деляться на 5 групп)
+     *  param1 - каждая группа имеет параметры paramX, кол. которых возрвстают с возрвстанием группы
+     *  param2, param3...
+     *
+     * @param int $count
+     * @param bool $create_obj
+     * @return array
+     */
+    public function createListItems($count = null, $create_obj = false)
     {
-        $arr = array(
-            'key1' => $key1
-        );
-        $args = func_get_args();
-        array_shift($args);
-        foreach ($args as $k => $v) {
-            $k = $k +2;
-            $k = 'key'. $k;
-            $arr[$k] = $v;
+        $groups = 5;
+        if ($count === null) {
+            $count = self::DEFAULT_COUNT;
         }
-        return $arr;
+        $data = array();
+        $group_count = ceil($count / $groups);
+
+        for ($i = 0; $i < $count; $i++ ) {
+            $_current_group =  ceil(($i + 1) / $group_count);
+            $item = array(
+                'id'   => $i,
+                'name' => "name_" . $i,
+                'type' => 'new',
+                'group' => $_current_group,
+            );
+            for($g = 1; $g < $_current_group; $g++) {
+                $item["param$g"] = null;
+            }
+
+            if ($create_obj) {
+                $item = (object) $item;
+            }
+            $data[] = $item;
+        }
+
+        return $data;
     }
 
     /**
@@ -83,7 +98,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $objectCollection = new ObjectCollection();
 
         for ($index = 0; $index < $count; $index ++ ) {
-            $objectCollection->addAt(new ObjectItem("name_$index", $index));
+            $objectCollection->addAt(new Item("name_$index", $index));
         }
         return $objectCollection;
     }
@@ -92,7 +107,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     {
         $this->handler_error_level = error_reporting(0);
         set_error_handler(function($errno) use ($errno_level) {
-            if (!($errno & $errno_level)) {
+            if ( ! ($errno & $errno_level)) {
                 return;
             }
             throw new \Exception("Error", $errno);
@@ -112,7 +127,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->object = new ObjectCollection(array(new ObjectItem()));
+        $this->object = new ObjectCollection(array(new Item()));
     }
 
     /**
@@ -125,40 +140,58 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
             $this->restoreErrorHandler();
         }
     }
-
-    /*************************************************************************
+    /*     * ***********************************************************************
      * TEST FUNCTION
-     *************************************************************************/
-    
+     * *********************************************************************** */
+
     /**
      * @covers Fobia\ObjectCollection::__construct
      * @covers Fobia\ObjectCollection::_resor
-     * @todo   Implement testConstruct().
      */
-    public function testConstruct()
+    public function testConstruct1()
     {
-        $object = new ObjectCollection();
-        $this->assertInstanceOf('\Fobia\ObjectCollection', $object);
+        $collection = new ObjectCollection();
+        $this->assertInstanceOf('Fobia\ObjectCollection', $collection);
+        $this->assertEquals(0, $collection->count());
+    }
 
-        $object = new ObjectCollection(array(
-            new ObjectItem('new')
-        ));
-        $this->assertInstanceOf('\Fobia\ObjectCollection', $object);
+    /**
+     * @covers Fobia\ObjectCollection::__construct
+     * @covers Fobia\ObjectCollection::_resor
+     */
+    public function testConstruct2()
+    {
+        $arr        = array(
+            array('name' => 'o_1'),
+            array('name' => 'o_1'),
+            array('name' => 'o_1'),
+        );
+        $collection = new ObjectCollection($arr);
+        $this->assertInstanceOf('Fobia\ObjectCollection', $collection);
+        $this->assertEquals(3, $collection->count());
     }
 
     /**
      * @covers Fobia\ObjectCollection::eq
-     * @todo   Implement testEq().
      */
     public function testEq()
     {
-        $obj = $this->object->eq();
-        $this->assertEquals('default', $obj->name);
+        $item0 = new Item();
+        $item1 = new Item();
+        $item2 = new Item();
+
+        $collection = new ObjectCollection(array(
+            $item0, $item1, $item2
+        ));
+
+        $this->assertEquals($item0, $collection->eq());
+        $this->assertEquals($item0, $collection->eq(0));
+        $this->assertEquals($item1, $collection->eq(1));
+        $this->assertNull(@$collection->eq(3));
     }
 
     /**
      * @covers Fobia\ObjectCollection::index
-     * @todo   Implement testIndex().
      */
     public function testIndex()
     {
@@ -166,7 +199,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $k = $this->object->index($obj);
         $this->assertEquals(0, $k[0]);
 
-        $obj1 = new ObjectItem('new');
+        $obj1 = new Item('new');
         $this->object->addAt($obj1);
         $k = $this->object->index($obj1);
         $this->assertEquals(1, $k[0]);
@@ -178,7 +211,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddAtDefault()
     {
-        $obj = new ObjectItem('new');
+        $obj = new Item('new');
         $this->object->addAt($obj);
 
         $this->assertEquals(2, $this->object->count());
@@ -209,7 +242,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddAtFirst()
     {
-        $obj = new ObjectItem('new');
+        $obj = new Item('new');
 
         $this->object->addAt($obj, 0);
         $this->assertEquals(2, $this->object->count());
@@ -222,13 +255,13 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddAtOther()
     {
-        $obj = new ObjectItem('new');
+        $obj = new Item('new');
         $this->object->addAt($obj, 7);
 
         $this->assertEquals(2, $this->object->count());
         $this->assertEquals($obj, $this->object->eq(1));
 
-        $obj2 = new ObjectItem('new 2');
+        $obj2 = new Item('new 2');
         $this->object->addAt($obj2, 1);
 
         $this->assertEquals(3, $this->object->count());
@@ -247,25 +280,25 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     {
         $collection = new ObjectCollection();
         for ($index = 0; $index <= 10; $index ++ ) {
-            $collection->addAt(new ObjectItem('new-' . $index));
+            $collection->addAt(new Item('new-' . $index));
         }
         $this->assertCount(11, $collection);
 
-        $collection->addAt(new ObjectItem('add'), 2);
+        $collection->addAt(new Item('add'), 2);
         $this->assertCount(12, $collection);
         $this->assertEquals('new-1', $collection->eq(1)->name);
         $this->assertEquals('add', $collection->eq(2)->name);
         $this->assertEquals('new-2', $collection->eq(3)->name);
         $collection->removeAt(2);
 
-        $collection->addAt(new ObjectItem('add'), -1);
+        $collection->addAt(new Item('add'), -1);
         $this->assertCount(12, $collection);
         $this->assertEquals('new-9', $collection->eq(9)->name);
         $this->assertEquals('add', $collection->eq(10)->name);
         $this->assertEquals('new-10', $collection->eq(11)->name);
         $collection->removeAt(10);
 
-        $collection->addAt(new ObjectItem('add'), 99);
+        $collection->addAt(new Item('add'), 99);
         $this->assertCount(12, $collection);
         $this->assertEquals('new-1', $collection->eq(1)->name);
         $this->assertEquals('new-10', $collection->eq(10)->name);
@@ -280,7 +313,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     {
         $collection = new ObjectCollection();
         for ($index = 1; $index <= 10; $index ++ ) {
-            $collection->addAt(new ObjectItem('new-' . $index));
+            $collection->addAt(new Item('new-' . $index));
         }
         $collection->unique();
         $this->assertCount(10, $collection);
@@ -299,25 +332,24 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::filter
-     * @todo   Implement testFilter().
      */
     public function testFilter()
     {
-        $this->object->addAt(new ObjectItem('new_1'));
-        $this->object->addAt(new ObjectItem('new_2'));
-        $this->object->addAt(new ObjectItem('new_3'));
+        $this->object->addAt(new Item('new_1'));
+        $this->object->addAt(new Item('new_2'));
+        $this->object->addAt(new Item('new_3'));
 
-        $obj = new ObjectItem('other');
+        $obj = new Item('other');
         $this->object->addAt($obj);
 
         $param = 'other';
-        $this->object->filter(function($obj, $key, $param) {
+        $this->object->filter(function($obj) use ($param) {
             if ($obj->name === $param) {
                 return false;
             } else {
                 return true;
             }
-        }, $param);
+        });
 
         $this->assertCount(4, $this->object);
 
@@ -337,26 +369,25 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::filter
-     * @todo   Implement testFilterError()
      * @expectedException \Exception
      */
-//    public function testFilterError()
-//    {
-        //$this->setErrorHandler();
-        //$this->object->filter("no-callback");
-//    }
+    public function testFilterError()
+    {
+        $this->setErrorHandler(E_USER_ERROR);
+        $this->object->filter("no-callback");
+        $this->restoreErrorHandler();
+    }
 
     /**
      * @covers Fobia\ObjectCollection::find
-     * @todo   Implement testFindProperty().
      */
     public function testFindProperty()
     {
-        $this->object->addAt(new ObjectItem('new_1'));
-        $this->object->addAt(new ObjectItem('new_2'));
-        $this->object->addAt(new ObjectItem('new_3'));
+        $this->object->addAt(new Item('new_1'));
+        $this->object->addAt(new Item('new_2'));
+        $this->object->addAt(new Item('new_3'));
 
-        $obj = new ObjectItem('other');
+        $obj = new Item('other');
         $obj->otherKey = 17;
         $this->object->addAt($obj);
 
@@ -371,14 +402,13 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::find
-     * @todo   Implement testFindValue().
      */
     public function testFindValue()
     {
-        $this->object->addAt(new ObjectItem('new_1', 1));
-        $this->object->addAt(new ObjectItem('new_1', 2));
-        $this->object->addAt(new ObjectItem('new_2', 3));
-        $this->object->addAt(new ObjectItem('new_3', 4));
+        $this->object->addAt(new Item('new_1', 1));
+        $this->object->addAt(new Item('new_1', 2));
+        $this->object->addAt(new Item('new_2', 3));
+        $this->object->addAt(new Item('new_3', 4));
 
         $resultFind = $this->object->find('name', 'new_1');
         $this->assertCount(2, $resultFind);
@@ -395,21 +425,19 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::find
-     * @todo   Implement testFindCallback().
      */
     public function testFindCallback()
     {
-        $this->object->addAt(new ObjectItem('new_1', 1));
-        $this->object->addAt(new ObjectItem('new_1', 2));
-        $this->object->addAt(new ObjectItem('new_2', 3));
-        $this->object->addAt(new ObjectItem('new_3', 4));
+        $this->object->addAt(new Item('new_1', 1));
+        $this->object->addAt(new Item('new_1', 2));
+        $this->object->addAt(new Item('new_2', 3));
+        $this->object->addAt(new Item('new_3', 4));
 
-        $resultFind = $this->object->find(function($obj, $key, $value) {
-            if ($obj->$key == $value) {
+        $resultFind = $this->object->find(function($obj, $key) {
+            if ($obj->name == 'new_1') {
                 return true;
             }
-        },
-        'name', 'new_1' );
+        });
 
         $this->assertCount(2, $resultFind);
         $this->assertEquals('new_1', $resultFind->eq(0)->name);
@@ -417,29 +445,12 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Fobia\ObjectCollection::find
-     * @todo   Implement testFindValueCallback().
-     */
-    public function testFindValueCallback()
-    {
-        $object = $this->createObjectCollection(5);
-        $resultFind = $object->find('key', function($value, $obj) {
-            if ($value > 3) {
-                return true;
-            }
-        });
-        $this->assertCount(1, $resultFind);
-        $this->assertEquals('name_4', $resultFind->eq()->name);
-    }
-
-    /**
      * @covers Fobia\ObjectCollection::set
-     * @todo   Implement testSet().
      */
     public function testSet()
     {
         // Remove the following lines when you implement this test.
-        $this->object->addAt(new ObjectItem());
+        $this->object->addAt(new Item());
 
         $this->object->set('key', 'set value');
         foreach ($this->object as $obj) {
@@ -449,39 +460,87 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::get
-     * @todo   Implement testGet().
      */
     public function testGet()
     {
-        $obj1 = new ObjectItem(1);
-        $obj2 = new ObjectItem(2);
-        $obj3 = new ObjectItem(3);
+        $collection = new ObjectCollection(array(
+            new Item(0),
+            new Item(1),
+            new Item(2),
+            new Item(3),
+        ));
 
-        $this->object->eq()->name = 0;
-        $this->object->addAt($obj1);
-        $this->object->addAt($obj2);
-        $this->object->addAt($obj3);
-
-        $get = $this->object->get('name');
+        $get = $collection->get('name');
         foreach ($get as $key => $value) {
             $this->assertEquals($key, $value);
         }
     }
 
     /**
-     * @covers Fobia\ObjectCollection::getArr
-     * @todo   Implement testGetArr().
+     * @covers Fobia\ObjectCollection::get
      */
-    public function testGetArr()
+    public function testGetWhithArray()
+    {
+        $objects = $this->createObjectCollection(5);
+
+        $arr = array(
+            array('name' => 'name_0', 'key' => 0),
+            array('name' => 'name_1', 'key' => 1),
+            array('name' => 'name_2', 'key' => 2),
+            array('name' => 'name_3', 'key' => 3),
+            array('name' => 'name_4', 'key' => 4),
+        );
+        $get = $objects->get(array('name', 'key'));
+        $this->assertSame ($arr, $get);
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::get
+     */
+    public function testGetWhithKeyname()
+    {
+        $objects = $this->createObjectCollection(5);
+        
+        $arr = array(
+            'name_0'  => 0,
+            'name_1'  => 1,
+            'name_2'  => 2,
+            'name_3'  => 3,
+            'name_4'  => 4,
+        );
+        $this->assertSame($arr, $objects->get('name', 'key'));
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::get
+     */
+    public function testGetWhithKeynameForArray()
+    {
+        $objects = $this->createObjectCollection(5);
+
+        $arr = array(
+            'name_0' => array('name' => 'name_0', 'key' => 0),
+            'name_1' => array('name' => 'name_1', 'key' => 1),
+            'name_2' => array('name' => 'name_2', 'key' => 2),
+            'name_3' => array('name' => 'name_3', 'key' => 3),
+            'name_4' => array('name' => 'name_4', 'key' => 4),
+        );
+        $this->assertSame($arr, $objects->get( 'name', array('name', 'key') ));
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::get
+     */
+    public function testGetWhithArray2()
     {
         $objects = new ObjectCollection(array(
-            new ObjectItem('name_0', 0),
-            new ObjectItem('name_1', 1),
-            new ObjectItem('name_2', 2),
-            new ObjectItem('name_3', 3),
+            new Item('name_0', 0),
+            new Item('name_1', 1),
+            new Item('name_2', 2),
+            new Item('name_3', 3),
         ));
 
-        $get = $objects->getArr('name', 'key');
+        $get = $objects->get(array('name', 'key'));
 
         $this->assertInternalType('array', $get);
         foreach ($get as $key => $value) {
@@ -496,7 +555,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testRemoveAt()
     {
-        $foo = new ObjectItem('foo');
+        $foo = new Item('foo');
         $this->object->addAt($foo);
         $this->assertCount(2, $this->object);
 
@@ -516,7 +575,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testRemove()
     {
-        $foo = new ObjectItem('foo');
+        $foo = new Item('foo');
         $this->object->addAt($foo);
 
         $this->object->remove($foo);
@@ -526,62 +585,56 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::each
-     * @todo   Implement testEach().
      */
     public function testEach()
     {
-        $this->object->addAt(new ObjectItem('new_4', 1));
-        $this->object->addAt(new ObjectItem('new_3', 2));
-        $this->object->addAt(new ObjectItem('new_2', 3));
-        $this->object->addAt(new ObjectItem('new_1', 4));
+        $collection = new ObjectCollection(array(
+            new Item('new_4', 1),
+            new Item('new_3', 2),
+            new Item('new_2', 3),
+            new Item('new_1', 4),
+        ));
 
         $self = & $this;
 
-        $this->object->each(function($obj, $index) use ($self) {
-            // $self->assertEquals($self->object->eq($index), $obj);
+        $collection->each(function($obj) {
             $obj->each = true;
         });
 
-        foreach ($this->object as $obj) {
+        foreach ($collection as $obj) {
             $self->assertTrue($obj->each);
         }
-
-        $findResult = $this->object->find('key', function($key) {
-             return ($key > 2);
-        });
-        $self->assertCount(2, $findResult);
     }
 
     /**
      * @covers Fobia\ObjectCollection::each
-     * @todo   Implement testEachCallback().
      */
     public function testEachCallback()
     {
-        $this->object->addAt(new ObjectItem('new_1', 1));
-        $this->object->addAt(new ObjectItem('new_2', 2));
-        $this->object->addAt(new ObjectItem('new_3', 3));
-        $this->object->addAt(new ObjectItem('new_4', 4));
+        $this->object->addAt(new Item('new_1', 1));
+        $this->object->addAt(new Item('new_2', 2));
+        $this->object->addAt(new Item('new_3', 3));
+        $this->object->addAt(new Item('new_4', 4));
 
         $this->object->each(function($obj) {
             $obj->name = "each";
             return false;
         });
-        
+
         $this->assertEquals("each", $this->object->eq()->name);
         $this->assertEquals("new_1", $this->object->eq(1)->name);
     }
 
     /**
      * @covers Fobia\ObjectCollection::each
-     * @todo   Implement testEachError().
      * @expectedException \Exception
      */
-//    public function testEachError()
-//    {
-        //$this->setErrorHandler();
-        //$this->object->each("no-callback");
-//    }
+    public function testEachError()
+    {
+        $this->setErrorHandler(E_USER_ERROR);
+        $this->object->each("no-callback");
+        $this->restoreErrorHandler();
+    }
 
     /**
      * @covers Fobia\ObjectCollection::sort
@@ -590,10 +643,10 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testSort()
     {
-        $this->object->addAt(new ObjectItem('new_1', 4));
-        $this->object->addAt(new ObjectItem('new_3', 2));
-        $this->object->addAt(new ObjectItem('new_2', 3));
-        $this->object->addAt(new ObjectItem('new_4', 1));
+        $this->object->addAt(new Item('new_1', 4));
+        $this->object->addAt(new Item('new_3', 2));
+        $this->object->addAt(new Item('new_2', 3));
+        $this->object->addAt(new Item('new_4', 1));
         $this->object->eq()->key = 1000;
 
         $this->object->sort('key');
@@ -608,7 +661,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     /**
      * @covers Fobia\ObjectCollection::sort
      * @covers Fobia\ObjectCollection::_sort_property
-     * @todo   Implement testSort().
+     * @todo   Implement testSortError1().
      * @expectedException \Exception
      */
     public function testSortError1()
@@ -633,7 +686,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::count
-     * @todo   Implement testCount().
      */
     public function testCount()
     {
@@ -643,7 +695,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::getIterator
-     * @todo   Implement testGetIterator().
      */
     public function testGetIterator()
     {
@@ -658,7 +709,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::toArray
-     * @todo   Implement testToArray().
      */
     public function testToArray()
     {
@@ -673,7 +723,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testUnique()
     {
-        $obj = new ObjectItem('add-1');
+        $obj = new Item('add-1');
         $this->object->addAt($obj);
         $this->object->addAt($obj);
         $this->object->addAt($obj);
@@ -695,7 +745,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testMerge()
     {
-        $obj = new ObjectItem('add-1');
+        $obj = new Item('add-1');
         $collection = new ObjectCollection();
         $collection->addAt($obj);
         $collection->addAt($obj);
@@ -712,12 +762,42 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::merge
+     * @expectedException \Exception
+     */
+    public function testMergeOther()
+    {
+        $this->setErrorHandler(E_USER_WARNING);
+
+        $obj = 1;
+        $this->object->merge($obj);
+
+        $this->restoreErrorHandler();
+
+        $this->assertCount(1, $this->object);
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::merge
+     */
+    public function testMergeArrayItems()
+    {
+        $arr = array(
+            $obj = new Item('add-1'),
+            $obj = new Item('add-2')
+        );
+
+        $this->object->merge($arr);
+        $this->assertCount(3, $this->object);
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::merge
      * @todo   Implement testMergeObject().
      */
     public function testMergeObject()
     {
-        $obj = new ObjectItem('add-1');
-        $this->object->merge($obj);
+        $obj = new Item('add-1');
+        $this->object->merge(array($obj));
 
         $this->assertCount(2, $this->object);
     }

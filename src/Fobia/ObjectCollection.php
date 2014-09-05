@@ -31,25 +31,45 @@
 namespace Fobia;
 
 /**
- * ObjectCollection
+ * Колекция объектов. Позволяет работать сразу над всеми объектами, фильтравать, устанавливать и извлекать их свойства.
  *
- * @author   Dmitriy Tyurin <fobia3d@gmail.com>
+ * Все элементы преобразуются в объекты.
+ * По умолчанию список может содержать повторяющиеся объекты, а преобразованые
+ * элементы являються каждый уникальным.
+ *
+ *
  * @package  Fobia
+ * @author   Dmitriy Tyurin <fobia3d@gmail.com>
  */
 class ObjectCollection implements \IteratorAggregate, \Countable
 {
 
-    /** @var array */
+    /**
+     * Список объектов
+     *
+     * @var array
+     */
     protected $data = array();
 
-    /** @var int */
+    /**
+     * Количество объектов
+     *
+     * @var int
+     */
     private $_count = 0;
 
-    /** @var boolean */
-    private $_unique = false;
+    /**
+     * Флак, что все объекты уникальные
+     *
+     * @var boolean
+     */
+    private $_unique;
 
     /**
-     * @internal
+     * Конструктор.
+     * 
+     * @param array $data
+     * @param bool  $unique
      */
     public function __construct(array $data = array(), $unique = false)
     {
@@ -62,7 +82,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     }
 
     /**
-     * Выбрать непосредственно экземпляр объекта.
+     * Выбрать непосредственно экземпляр объекта по его индексу.
      *
      * @param int $index индекс объекта
      * @return \stdObject
@@ -77,37 +97,31 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      *
      * Возвращает новый объект
      *
-     * ### Поиск объектов с существующим свойством
-     * e.g `find('Location');`
+     * <code>
+     * // Поиск объектов с существующим свойством
+     * $oc->find('Location');
      *
-     * ### Поиск объектов со свойством равным указаному значению
-     * e.g `find('Location', 'localhost/js');`
+     * // Поиск объектов со свойством равным указаному значению
+     * $oc->find('Location', 'localhost/js');
      *
-     * ### Поиск объектов удавлетворяющие возврату функции
-     * e.g `find('Location', function($name_value, $obj, $args), $args);`
+     * // Поиск объектов удавлетворяющие возврату функции
+     * $oc->find(function($obj, $key));
+     * </code>
      *
-     * ### Поиск объектов удавлетворяющие возврату функции
-     * e.g `find(function($obj, $args...),  $args, ...);`
-     *
-     * @param string   $name       название свойства
-     * @param mixed    $param      его значение или функция обратного вызова.
-     *                             в функцию передаеться [значение поля, оъект, $args]
-     * @param mixed    $args       дополнительные параметры, переданные в функцию
-     *                             обратного вызова.
+     * @param string|callable  $name   название свойства или функция обратного вызова.
+     *                                 в функцию передаеться [оъект, его индекс]
+     * @param mixed            $value  его значение, если $name строка
      * @return \Fobia\ObjectCollection  колекция найденных объектов.
-     *
-     * @api
      */
-    public function find($name, $param = null, $args = null)
+    public function find($name, $value = null)
     {
         $data = array();
 
+        // Функция пользователя
         if (!is_string($name) && is_callable($name)) {
-            $args = func_get_args();
-            array_shift($args);
-
-            foreach ($this->data as $obj) {
-                if (call_user_func_array($name, array_merge(array($obj), $args) ) ){
+            $callback = $name;
+            foreach ($this->data as $key => $obj) {
+                if ( $callback($obj, $key) ){
                     $data[] = $obj;
                 }
             }
@@ -123,46 +137,35 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             }
         }
 
+        // Сравнение свойства
         if (func_num_args() > 1) {
-            //$args = func_get_args();
-            //$args = $args[2];
-            // Сравнение свойства
             foreach ($this->data as $obj) {
-                // Функция обратного вызова
-                if (is_callable($param)) {
-                    if ($param($obj->$name, $obj, $args)) {
-                        $data[] = $obj;
-                    }
-                } else {
-                    if ($obj->$name == $param) {
-                        $data[] = $obj;
-                    }
+                if ($obj->$name == $value) {
+                    $data[] = $obj;
                 }
             }
         }
 
-        return new self($data);
+        return new self($data, $this->_unique);
     }
 
     /**
      * Отфильтровать список объектов используя функции обратного вызова.
-     * В Функцию передаються объект  и его индекс.
-     * Все объекты на которые функция вернула false, исключаються
+     *
+     * В Функцию передаються объект и его индекс.
+     * Все объекты на которые функция вернула false, исключаються.
      *
      * @param callable $callback
-     * @param mixed ...
      * @return self
      */
     public function filter($callback)
     {
         is_callable($callback) or  trigger_error("CORE: Параметр не является функцией обратного вызова.", E_USER_ERROR);
 
-        $args = func_get_args();
-        array_shift($args);
-
         $arr = array();
         foreach ($this->data as $key => $obj) {
-            if (call_user_func_array($callback, array_merge(array($obj, $key), $args))){
+            // if (call_user_func_array($callback, array($obj, $key))){
+            if ($callback($obj, $key)){
                 $arr[] = $obj;
             }
         }
@@ -177,7 +180,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Возвращает индекс объекта в колекции
      *
      * @param mixed   $object
-     * @param boolean $strict точное совпадение объекта
+     * @param boolean $strict   точное совпадение объекта
      * @return array
      */
     public function index($object, $strict = true)
@@ -205,40 +208,70 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Выбрать значения свойсвта из списка.
      *
-     * @param string $name
+     * Если второй аргумент не передан, то возвращаеться список значений свойств
+     * $name либо список масивов со свойствами. 
+     * Если передан второй параметр возвращаеться ассоциативный массив, сформированый 
+     * аналогично первому варианту, а ключи являються значения имени свойства по первому 
+     * аргументу. (Дубликаты замещаються)
+     *
+     * <code>
+     * // Вернет список определеного поля
+     * $oc->get('login');
+     *
+     * // Вернет список масивов полей
+     * $oc->get(array('login', 'password'))
+     *
+     * // Вернет ассоциативный массив, где ключом являеться первый аргумент,
+     * // а значения поля объектов, сформированых из второго аргумента
+     * $oc->get('key', 'login');
+     * $oc->get('key', array('login', 'password');
+     * </code>
+     *
+     * @param string|array $name
+     * @param string|array $fields
      * @return array
      */
-    public function get($name)
+    public function get($name, $fields = null)
     {
         $data = array();
-        foreach ($this->data as $obj) {
-            $data[] = $obj->$name;
-        }
 
-        return $data;
-    }
-
-    /**
-     * Выбрать список значений свойсвт объектов.
-     *
-     * @param string $name
-     * @param string ...
-     * @return array
-     */
-    public function getArr($name)
-    {
-        $arr = array();
-        $names = func_get_args();
-
-        foreach ($this->data as $object) {
-            $item = array();
-            foreach ($names as $name) {
-                $item[$name] = $object->$name;
+        // список масивов полей
+        if (is_array($name)) {
+            foreach ($this->data as $obj) {
+                $item = array();
+                foreach ($name as $key) {
+                    $item[$key] = $obj->$key;
+                }
+                $data[] = $item;
             }
-            $arr[] = $item;
+            return $data;
         }
 
-        return $arr;
+        // список определеного поля
+        if ($fields === null) {
+            foreach ($this->data as $obj) {
+                $data[] = $obj->$name;
+            }
+            return $data;
+        }
+
+        // ассоциативный массив полей по ключу
+        if (is_array($fields)) {
+            foreach ($this->data as $obj) {
+                $item = array();
+                foreach ($fields as $key) {
+                    $item[$key] = $obj->$key;
+                }
+                $data[$obj->$name] = $item;
+            }
+            return $data;
+        } else {
+            // ассоциативный массив полея
+            foreach ($this->data as $obj) {
+                $data[$obj->$name] = $obj->$fields;
+            }
+            return $data;
+        }
     }
 
     /**
@@ -287,15 +320,15 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     {
         if ($data instanceof ObjectCollection) {
             $data = $data->toArray();
+        } elseif ( is_array($data) ) {
+            array_walk($data, function(&$value) {
+                $value = (object) $value;
+            });
+        } else {
+            $data = array(/*$data*/);
+            trigger_error("Параметр не являеться масивом", E_USER_WARNING);
         }
 
-        if ( ! is_array($data) ) {
-            $data = array($data);
-        }
-
-        array_walk($data, function(&$value) {
-            $value = (object) $value;
-        });
         $this->data  = array_merge($this->data, $data);
 
         if ($this->_unique) {
@@ -343,6 +376,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
 
     /**
      * Обходит весь масив, передавая функции объект, его индекс и дополнительные параметры.
+     *
+     * В функцию передаються [объект, его индекс, дополнительный параметр]
      * Если функция возвращает false, обход останавливаеться.
      *
      * @param callback $callback
@@ -354,8 +389,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         is_callable($callback) or trigger_error("CORE: Параметр не является функцией обратного вызова.", E_USER_ERROR);
 
         foreach ($this->data as $key => $obj) {
-            if (call_user_func_array($callback, array($obj, $key, $args)) === false) {
-            // if ($callback($obj, $key, $args) === false) {
+            // if (call_user_func_array($callback, array($obj, $key, $args)) === false) {
+            if ($callback($obj, $key, $args) === false) {
                 break;
             }
         }
@@ -366,7 +401,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Устанавливает только уникальные элементы
      *
-     * @return \self
+     * @param bool $strict строгое равенство для объектов
+     * @return self
      */
     public function unique($strict = true)
     {
@@ -415,8 +451,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     protected function _sort_property($key = null)
     {
-        if ( ! $key )
-            trigger_error("Плохой параметр сортировки", E_USER_WARNING);
+        if ( ! $key ) trigger_error("Плохой параметр сортировки", E_USER_WARNING);
 
         return function($a, $b) use($key) {
             return strnatcmp($a->$key, $b->$key);
@@ -475,7 +510,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->data);
+        return new \ArrayIterator( $this->data );
     }
 
     /**
