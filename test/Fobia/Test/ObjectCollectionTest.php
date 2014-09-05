@@ -762,6 +762,36 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::merge
+     * @expectedException \Exception
+     */
+    public function testMergeOther()
+    {
+        $this->setErrorHandler(E_USER_WARNING);
+
+        $obj = 1;
+        $this->object->merge($obj);
+
+        $this->restoreErrorHandler();
+
+        $this->assertCount(1, $this->object);
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::merge
+     */
+    public function testMergeArrayItems()
+    {
+        $arr = array(
+            $obj = new Item('add-1'),
+            $obj = new Item('add-2')
+        );
+
+        $this->object->merge($arr);
+        $this->assertCount(3, $this->object);
+    }
+
+    /**
+     * @covers Fobia\ObjectCollection::merge
      * @todo   Implement testMergeObject().
      */
     public function testMergeObject()

@@ -320,13 +320,13 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     {
         if ($data instanceof ObjectCollection) {
             $data = $data->toArray();
-        } elseif ( ! is_array($data) ) {
-            trigger_error("Параметр не являеться масивом", E_USER_WARNING);
-            $data = array($data);
-        } else {
+        } elseif ( is_array($data) ) {
             array_walk($data, function(&$value) {
                 $value = (object) $value;
             });
+        } else {
+            $data = array(/*$data*/);
+            trigger_error("Параметр не являеться масивом", E_USER_WARNING);
         }
 
         $this->data  = array_merge($this->data, $data);
@@ -451,9 +451,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     protected function _sort_property($key = null)
     {
-        if ( ! $key ) {
-            trigger_error("Плохой параметр сортировки", E_USER_WARNING);
-        }
+        if ( ! $key ) trigger_error("Плохой параметр сортировки", E_USER_WARNING);
 
         return function($a, $b) use($key) {
             return strnatcmp($a->$key, $b->$key);
