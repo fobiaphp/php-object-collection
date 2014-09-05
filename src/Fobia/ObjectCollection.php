@@ -317,15 +317,15 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     {
         if ($data instanceof ObjectCollection) {
             $data = $data->toArray();
-        }
-
-        if ( ! is_array($data) ) {
+        } elseif ( ! is_array($data) ) {
+            trigger_error("Параметр не являеться масивом", E_USER_WARNING);
             $data = array($data);
+        } else {
+            array_walk($data, function(&$value) {
+                $value = (object) $value;
+            });
         }
 
-        array_walk($data, function(&$value) {
-            $value = (object) $value;
-        });
         $this->data  = array_merge($this->data, $data);
 
         if ($this->_unique) {
