@@ -42,6 +42,52 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     protected $object;
     protected $handler_error_level;
 
+    const DEFAULT_COUNT = 10;
+
+    /**
+     * Создает список элементов
+     * Каждый элемент имеет
+     *  id   - порядковый номер
+     *  name - имя (на основе id)
+     *  type - типо (у всех new)
+     *  group - группа элемента (Общее кол. создаваемых элементов деляться на 5 групп)
+     *  param1 - каждая группа имеет параметры paramX, кол. которых возрвстают с возрвстанием группы
+     *  param2, param3...
+     *
+     * @param int $count
+     * @param bool $create_obj
+     * @return array
+     */
+    public function createListItems($count = null, $create_obj = false)
+    {
+        $groups = 5;
+        if ($count === null) {
+            $count = self::DEFAULT_COUNT;
+        }
+        $data = array();
+        $group_count = ceil($count / $groups);
+
+        for ($i = 0; $i < $count; $i++ ) {
+            $_current_group =  ceil(($i + 1) / $group_count);
+            $item = array(
+                'id'   => $i,
+                'name' => "name_" . $i,
+                'type' => 'new',
+                'group' => $_current_group,
+            );
+            for($g = 1; $g < $_current_group; $g++) {
+                $item["param$g"] = null;
+            }
+
+            if ($create_obj) {
+                $item = (object) $item;
+            }
+            $data[] = $item;
+        }
+
+        return $data;
+    }
+
     /**
      *
      * @param int $count
