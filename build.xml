@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="PHP Object Collection" default="build">
+
+  <property name="builddir" value="${basedir}/build"/>
+
+  <!-- <property name="bindir" value="${basedir}/vendor/bin/" /> -->
+  <property name="bindir" value="" />
+
+  <property name="phploc" value="${bindir}phploc"/>
+  <property name="pdepend" value="${bindir}pdepend"/>
+  <property name="phpmd" value="${bindir}phpmd"/>
+  <property name="phpcpd" value="${bindir}phpcpd"/>
+  <property name="phpunit" value="${bindir}phpunit" />
+
+  <target name="build" depends="lint,phploc,pdepend,phpcpd,phpunit"/>
+
+  <target name="clean" description="Cleanup build artifacts">
+    <delete dir="${builddir}"/>
+  </target>
+
+  <target name="clean-src" description="Cleanup dependency source code">
+    <delete file="${basedir}/composer.lock"/>
+    <delete dir="${basedir}/vendor"/>
+  </target>
+
+  <target name="clean-all" depends="clean,clean-src" description="Cleanup build artifacts and dependency source code"/>
+
+  <target name="php-check">
+    <condition property="php" value="php">
+      <not>
+        <isset property="${php}"/>
+      </not>
+    </condition>
+  </target>
+
+  <target name="prepare">
+    <mkdir dir="${builddir}/coverage"/>
+    <mkdir dir="${builddir}/logs"/>
+    <mkdir dir="${builddir}/pdepend"/>
+    <mkdir dir="${builddir}/test"/>
+  </target>
+
+  <target name="lint" depends="php-check" description="Perform syntax check of source code files">
+    <apply executable="${php}" failonerror="true">
+      <arg value="-l" />
+      <fileset dir="${basedir}/src">
+        <include name="**/*.php" />
+      </fileset>
+      <fileset dir="${basedir}/test">
+        <include name="**/*.php" />
+      </fileset>
+    </apply>
+  </target>
+
+
+  <target name="composer" description="Run composer update">
+    <exec executable="composer">
+      <arg value="update"/>
+    </exec>
+  </target>
+
+  <target name="phploc" depends="composer" description="Measure project size using PHPLOC">
+    <exec executable="${phploc}">
+      <arg value="--log-csv" />
+      <arg value="${builddir}/logs/phploc.csv" />
+      <arg path="${basedir}/src" />
+    </exec>
+  </target>
+
+  <target name="pdepend" depends="composer" description="Calculate software metrics using PHP_Depend">
+    <exec executable="${pdepend}">
+      <arg value="--jdepend-xml=${builddir}/logs/jdepend.xml" />
+      <arg value="--jdepend-chart=${builddir}/pdepend/dependencies.svg" />
+      <arg value="--overview-pyramid=${builddir}/pdepend/overview-pyramid.svg" />
+      <arg path="${basedir}/src" />
+    </exec>
+  </target>
+
+  <target name="phpcpd" description="Find duplicate code using PHPCPD">
+    <exec executable="${phpcpd}">
+      <arg value="--log-pmd" />
+      <arg value="${basedir}/build/logs/pmd-cpd.xml" />
+      <arg path="${basedir}/src" />
+    </exec>
+  </target>
+
+  <target name="phpunit" depends="composer" description="Run unit tests with PHPUnit">
+    <exec executable="${phpunit}" failonerror="true"/>
+  </target>
+
+</project>
