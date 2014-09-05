@@ -721,7 +721,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     public function testMergeObject()
     {
         $obj = new Item('add-1');
-        $this->object->merge($obj);
+        $this->object->merge(array($obj));
 
         $this->assertCount(2, $this->object);
     }
