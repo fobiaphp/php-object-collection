@@ -1,0 +1,18 @@
+require:
+	min: 2.8.0
+
+templates:
+#	common:
+#		overview.latte: index.html
+
+	main:
+		namespace:
+			filename: namespace-%s.html
+			template: namespace.latte
+		class:
+			filename: class-%s.md
+			template: class.latte
+
+#options:
+#	elementDetailsCollapsed: No
+#	elementsOrder: natural # alphabetical

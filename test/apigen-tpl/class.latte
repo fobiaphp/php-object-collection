@@ -1,0 +1,76 @@
+# {if $class->interface}Interface{elseif $class->trait}Trait{else}Class{/if} {$class->shortName}
+
+{if $class->valid} {/if}
+
+<div n:if="$template->longDescription($class)">
+{!$class|longDescription}
+</div>
+
+
+{var $ownMethods = $class->ownMethods}
+{var $usedMethods = $class->usedMethods}
+{var $ownMagicMethods = $class->ownMagicMethods}
+{var $inheritedMagicMethods = $class->inheritedMagicMethods}
+{var $usedMagicMethods = $class->usedMagicMethods}
+
+{if $ownMethods ||  $usedMethods || $ownMagicMethods || $usedMagicMethods}
+{define #method}
+
+{var $annotations = $method->annotations}
+
+{block|strip}
+	{$method->name}(
+	{foreach $method->parameters as $parameter}
+	{!$parameter->typeHint|typeLinks:$method}
+	${$parameter->name}
+	{sep}, {/sep}
+	{/foreach}
+)
+{/block}
+
+{!$method|longDescription}
+
+
+{if $method->parameters && isset($annotations['param'])}
+#### Parameters
+	{foreach $method->parameters as $parameter}
+		${$parameter->name}{if $parameter->unlimited},…{/if}
+		{ifset $annotations['param'][$parameter->position]}{!$annotations['param'][$parameter->position]|annotation:'param':$method}{/ifset}
+	{/foreach}
+{/if}
+
+{if isset($annotations['return']) && 'void' !== $annotations['return'][0]}
+#### Returns
+	{foreach $annotations['return'] as $description}
+		{!$description|annotation:'return':$method}<br>
+	{/foreach}
+{/if}
+
+{foreach $template->annotationSort($template->annotationFilter($annotations, array('deprecated', 'param', 'return', 'throws'))) as $annotation => $descriptions}
+	<h4>{$annotation|annotationBeautify}</h4>
+	<div class="list">
+	{foreach $descriptions as $description}
+		{if $description}
+			{!$description|annotation:$annotation:$method}<br>
+		{/if}
+	{/foreach}
+	</div>
+{/foreach}
+
+{/define}
+
+## Methods summary
+{if $ownMethods}
+{foreach $ownMethods as $method}
+	{include #method, method => $method}
+{/foreach}
+{/if}
+
+
+{/if}
+
+
+
+
+
+
