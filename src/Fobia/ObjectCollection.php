@@ -3,7 +3,7 @@
  * PHP Object Collection
  *
  * @author      Dmitriy Tyurin <fobia3d@gmail.com>
- * @copyright   Copyright (c) 2014 Dmitriy Tyurin
+ * @copyright   Copyright (c) 2015 Dmitriy Tyurin
  * @package     Fobia
  *
  * MIT LICENSE
@@ -67,7 +67,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
 
     /**
      * Конструктор.
-     * 
+     *
      * @param array $data
      * @param bool  $unique
      */
@@ -209,9 +209,9 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Выбрать значения свойсвта из списка.
      *
      * Если второй аргумент не передан, то возвращаеться список значений свойств
-     * $name либо список масивов со свойствами. 
-     * Если передан второй параметр возвращаеться ассоциативный массив, сформированый 
-     * аналогично первому варианту, а ключи являються значения имени свойства по первому 
+     * $name либо список масивов со свойствами.
+     * Если передан второй параметр возвращаеться ассоциативный массив, сформированый
+     * аналогично первому варианту, а ключи являються значения имени свойства по первому
      * аргументу. (Дубликаты замещаються)
      *
      * <code>

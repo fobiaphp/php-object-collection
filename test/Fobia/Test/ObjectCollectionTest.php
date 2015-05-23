@@ -3,7 +3,7 @@
  * CollectionTest class  - CollectionTest.php file
  *
  * @author     Dmitriy Tyurin <fobia3d@gmail.com>
- * @copyright  Copyright (c) 2014 Dmitriy Tyurin
+ * @copyright  Copyright (c) 2015 Dmitriy Tyurin
  */
 
 namespace Fobia\Test;
@@ -500,7 +500,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     public function testGetWhithKeyname()
     {
         $objects = $this->createObjectCollection(5);
-        
+
         $arr = array(
             'name_0'  => 0,
             'name_1'  => 1,
