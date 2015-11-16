@@ -6,7 +6,7 @@
  * @copyright  Copyright (c) 2015 Dmitriy Tyurin
  */
 
-namespace Fobia\Test;
+namespace Fobia;
 
 use Fobia\ObjectCollection;
 

@@ -160,7 +160,9 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     public function filter($callback)
     {
-        is_callable($callback) or  trigger_error("CORE: Параметр не является функцией обратного вызова.", E_USER_ERROR);
+        if (!is_callable($callback)) {
+            throw new \Exception("CORE: Параметр не является функцией обратного вызова.");
+        }
 
         $arr = array();
         foreach ($this->data as $key => $obj) {
@@ -326,7 +328,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             });
         } else {
             $data = array(/*$data*/);
-            trigger_error("Параметр не являеться масивом", E_USER_WARNING);
+            throw new \Exception("Параметр не являеться масивом");
         }
 
         $this->data  = array_merge($this->data, $data);
@@ -386,7 +388,9 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     public function each($callback, $args = null)
     {
-        is_callable($callback) or trigger_error("CORE: Параметр не является функцией обратного вызова.", E_USER_ERROR);
+        if (!is_callable($callback)) {
+            throw new \Exception("CORE: Параметр не является функцией обратного вызова.");
+        }
 
         foreach ($this->data as $key => $obj) {
             // if (call_user_func_array($callback, array($obj, $key, $args)) === false) {
@@ -435,7 +439,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             if ( is_callable($param) ) {
                 usort($this->data, $this->_sort_callable($param, $args));
             } else {
-                trigger_error("Плохой параметр сортировки", E_USER_WARNING);
+                throw new \Exception("Плохой параметр сортировки");
                 // usort($this->data, $this->_sort_property());
             }
         }
@@ -451,7 +455,9 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     protected function _sort_property($key = null)
     {
-        if ( ! $key ) trigger_error("Плохой параметр сортировки", E_USER_WARNING);
+        if ( ! $key ) {
+            throw new \Exception("Плохой параметр сортировки");
+        }
 
         return function($a, $b) use($key) {
             return strnatcmp($a->$key, $b->$key);
