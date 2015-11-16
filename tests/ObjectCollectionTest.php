@@ -551,9 +551,36 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::removeAt
-     * @todo   Implement testRemoveAt().
      */
     public function testRemoveAt()
+    {
+        $this->object->removeAt();
+        $this->assertCount(0, $this->object);
+    }
+
+    public function testRemoveAt1()
+    {
+        $foo = new Item('foo');
+        $this->object->addAt($foo);
+        $this->assertCount(2, $this->object);
+
+        $this->object->removeAt();
+        $this->assertCount(1, $this->object);
+        $this->assertNotEquals('foo', $this->object->eq()->name);
+    }
+
+    public function testRemoveAt2()
+    {
+        $foo = new Item('foo');
+        $this->object->addAt($foo);
+        $this->assertCount(2, $this->object);
+
+        $this->object->removeAt(0);
+        $this->assertCount(1, $this->object);
+        $this->assertEquals('foo', $this->object->eq()->name);
+    }
+
+    public function testRemoveAt3()
     {
         $foo = new Item('foo');
         $this->object->addAt($foo);
@@ -571,7 +598,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::remove
-     * @todo   Implement testRemove().
      */
     public function testRemove()
     {
@@ -639,7 +665,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     /**
      * @covers Fobia\ObjectCollection::sort
      * @covers Fobia\ObjectCollection::_sort_property
-     * @todo   Implement testSort().
      */
     public function testSort()
     {
@@ -661,7 +686,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     /**
      * @covers Fobia\ObjectCollection::sort
      * @covers Fobia\ObjectCollection::_sort_property
-     * @todo   Implement testSortError1().
      * @expectedException \Exception
      */
     public function testSortError1()
@@ -673,7 +697,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::sort
-     * @todo   Implement testSortError()
      * @expectedException \Exception
      */
     public function testSortError2()
@@ -719,7 +742,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::unique
-     * @todo   Implement testUnique().
      */
     public function testUnique()
     {
@@ -741,7 +763,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::merge
-     * @todo   Implement testMerge().
      */
     public function testMerge()
     {
@@ -772,6 +793,7 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->object->merge($obj);
 
         $this->restoreErrorHandler();
+        var_dump($this->object);
 
         $this->assertCount(1, $this->object);
     }
@@ -792,7 +814,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::merge
-     * @todo   Implement testMergeObject().
      */
     public function testMergeObject()
     {

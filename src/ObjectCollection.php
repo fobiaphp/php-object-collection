@@ -85,6 +85,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Выбрать непосредственно экземпляр объекта по его индексу.
      *
      * @param int $index индекс объекта
+     *
      * @return \stdObject
      */
     public function eq($index = 0)
@@ -108,9 +109,10 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * $oc->find(function($obj, $key));
      * </code>
      *
-     * @param string|callable  $name   название свойства или функция обратного вызова.
+     * @param string|callable $name    название свойства или функция обратного вызова.
      *                                 в функцию передаеться [оъект, его индекс]
-     * @param mixed            $value  его значение, если $name строка
+     * @param mixed           $value   его значение, если $name строка
+     *
      * @return \Fobia\ObjectCollection  колекция найденных объектов.
      */
     public function find($name, $value = null)
@@ -121,7 +123,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         if (!is_string($name) && is_callable($name)) {
             $callback = $name;
             foreach ($this->data as $key => $obj) {
-                if ( $callback($obj, $key) ){
+                if ($callback($obj, $key)) {
                     $data[] = $obj;
                 }
             }
@@ -156,6 +158,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Все объекты на которые функция вернула false, исключаються.
      *
      * @param callable $callback
+     *
+     * @throws \Exception
      * @return self
      */
     public function filter($callback)
@@ -167,7 +171,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         $arr = array();
         foreach ($this->data as $key => $obj) {
             // if (call_user_func_array($callback, array($obj, $key))){
-            if ($callback($obj, $key)){
+            if ($callback($obj, $key)) {
                 $arr[] = $obj;
             }
         }
@@ -182,7 +186,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Возвращает индекс объекта в колекции
      *
      * @param mixed   $object
-     * @param boolean $strict   точное совпадение объекта
+     * @param boolean $strict точное совпадение объекта
+     *
      * @return array
      */
     public function index($object, $strict = true)
@@ -194,8 +199,9 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Установить свойства в новое значение.
      *
-     * @param string   $name    имя свойства
-     * @param mixed    $value   устанавливаемое значение
+     * @param string $name  имя свойства
+     * @param mixed  $value устанавливаемое значение
+     *
      * @return self
      */
     public function set($name, $value)
@@ -231,6 +237,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      *
      * @param string|array $name
      * @param string|array $fields
+     *
      * @return array
      */
     public function get($name, $fields = null)
@@ -267,7 +274,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
                 $data[$obj->$name] = $item;
             }
             return $data;
-        } else {
+        }
+        else {
             // ассоциативный массив полея
             foreach ($this->data as $obj) {
                 $data[$obj->$name] = $obj->$fields;
@@ -279,15 +287,16 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Добавить объект в коллекцию.
      *
-     * @param stdObject   $object    позиция
-     * @param int         $index     позиция
+     * @param stdObject $object позиция
+     * @param int       $index  позиция
+     *
      * @return self
      */
     public function addAt($object, $index = null)
     {
         $strict = true;
-        if ( ! is_object($object)) {
-            $object = (object) $object;
+        if (!is_object($object)) {
+            $object = (object)$object;
             $strict = false;
         }
         if ($this->_unique) {
@@ -301,9 +310,10 @@ class ObjectCollection implements \IteratorAggregate, \Countable
 
         if ($index === null || $index >= $this->_count) {
             array_push($this->data, $object);
-        } else {
+        }
+        else {
             $arr_before = array_slice($this->data, 0, $index);
-            $arr_after =  array_slice($this->data,    $index);
+            $arr_after = array_slice($this->data, $index);
 
             $this->data = array_merge($arr_before, array($object), $arr_after);
         }
@@ -316,22 +326,25 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Сливает масив объектов в текущюю колекцию
      *
      * @param array|ObjectCollection $data
+     *
      * @return self
+     * @throws \Exception
      */
     public function merge($data)
     {
         if ($data instanceof ObjectCollection) {
             $data = $data->toArray();
-        } elseif ( is_array($data) ) {
-            array_walk($data, function(&$value) {
-                $value = (object) $value;
+        }
+        elseif (is_array($data)) {
+            array_walk($data, function (&$value) {
+                $value = (object)$value;
             });
-        } else {
-            $data = array(/*$data*/);
+        }
+        else {
             throw new \Exception("Параметр не являеться масивом");
         }
 
-        $this->data  = array_merge($this->data, $data);
+        $this->data = array_merge($this->data, $data);
 
         if ($this->_unique) {
             $this->unique();
@@ -345,7 +358,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Удалить объект с указаной позиции из колеции.
      *
-     * @param  int   $index    позиция
+     * @param  int $index позиция
+     *
      * @return self
      */
     public function removeAt($index = null)
@@ -364,6 +378,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Удалить объект.
      *
      * @param mixed $object
+     *
      * @return self
      */
     public function remove($object)
@@ -384,7 +399,9 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      *
      * @param callback $callback
      * @param mixed    $args
+     *
      * @return self
+     * @throws \Exception
      */
     public function each($callback, $args = null)
     {
@@ -406,13 +423,14 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Устанавливает только уникальные элементы
      *
      * @param bool $strict строгое равенство для объектов
+     *
      * @return self
      */
     public function unique($strict = true)
     {
         $arr = array();
         foreach ($this->data as $obj) {
-            if ( !array_keys($arr, $obj, $strict) ) {
+            if (!array_keys($arr, $obj, $strict)) {
                 $arr[] = $obj;
             }
         }
@@ -427,18 +445,22 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Сортирует список, используя функцию обратного вызова либо по полю.
      *
-     * @param callback|string $param  int callback ( mixed $a, mixed $b )
+     * @param callback|string $param int callback ( mixed $a, mixed $b )
      * @param mixed           $args
+     *
      * @return self
+     * @throws \Exception
      */
     public function sort($param, $args = null)
     {
-        if ( is_string($param) ) {
+        if (is_string($param)) {
             usort($this->data, $this->_sort_property($param));
-        } else {
-            if ( is_callable($param) ) {
+        }
+        else {
+            if (is_callable($param)) {
                 usort($this->data, $this->_sort_callable($param, $args));
-            } else {
+            }
+            else {
                 throw new \Exception("Плохой параметр сортировки");
                 // usort($this->data, $this->_sort_property());
             }
@@ -451,15 +473,17 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Сортировка по свойству
      *
      * @param string $key
+     *
      * @return int
+     * @throws \Exception
      */
     protected function _sort_property($key = null)
     {
-        if ( ! $key ) {
+        if (!$key) {
             throw new \Exception("Плохой параметр сортировки");
         }
 
-        return function($a, $b) use($key) {
+        return function ($a, $b) use ($key) {
             return strnatcmp($a->$key, $b->$key);
         };
     }
@@ -467,14 +491,15 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      *
      * @param callable $callable
-     * @param mixed $args
+     * @param mixed    $args
+     *
      * @return callable
      *
      * @codeCoverageIgnore
      */
     protected function _sort_callable($callable, $args = null)
     {
-        return function($a, $b) use($callable, $args) {
+        return function ($a, $b) use ($callable, $args) {
             return $callable($a, $b, $args);
         };
     }
@@ -483,6 +508,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Пересобрать список объектов
      *
      * @param boolean $resor_keys перенумеровать ключи
+     *
      * @return int   количество элементов
      */
     protected function _resor($resor_keys)
@@ -516,7 +542,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      */
     public function getIterator()
     {
-        return new \ArrayIterator( $this->data );
+        return new \ArrayIterator($this->data);
     }
 
     /**
