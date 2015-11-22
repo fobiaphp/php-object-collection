@@ -287,7 +287,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Добавить объект в коллекцию.
      *
-     * @param stdObject $object позиция
+     * @param \stdObject $object позиция
      * @param int       $index  позиция
      *
      * @return self

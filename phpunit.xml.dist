@@ -13,13 +13,7 @@
 >
     <testsuites>
         <testsuite name="PHP Object Collection">
-            <directory>./tests/</directory>
+            <directory>./Test/</directory>
         </testsuite>
     </testsuites>
-
-    <filter>
-      <whitelist>
-        <directory suffix="Test.php">src</directory>
-      </whitelist>
-    </filter>
 </phpunit>
