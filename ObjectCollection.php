@@ -71,11 +71,11 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * @param array $data
      * @param bool  $unique
      */
-    public function __construct(array $data = array(), $unique = false)
+    public function __construct($data = array(), $unique = false)
     {
         $this->_unique = $unique;
 
-        if (count($data)) {
+        if ($data) {
             $this->merge($data);
         }
         $this->_resor(false);
@@ -288,7 +288,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * Добавить объект в коллекцию.
      *
      * @param \stdObject $object позиция
-     * @param int       $index  позиция
+     * @param int        $index  позиция
      *
      * @return self
      */
@@ -335,6 +335,14 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         if ($data instanceof ObjectCollection) {
             $data = $data->toArray();
         }
+        elseif ($data instanceof \Traversable) {
+            $_data = array();
+            foreach ($data as $value) {
+                $_data[] = (object)$value;
+            }
+            $data = $_data;
+            unset($_data);
+        }
         elseif (is_array($data)) {
             array_walk($data, function (&$value) {
                 $value = (object)$value;
@@ -377,15 +385,21 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Удалить объект.
      *
-     * @param mixed $object
+     * @param mixed|array $objects
      *
      * @return self
      */
-    public function remove($object)
+    public function remove($objects)
     {
-        $keys = array_keys($this->data, $object, true);
-        foreach ($keys as $key) {
-            unset($this->data[$key]);
+        if (!$objects instanceof \Traversable && !is_array($objects)) {
+            $objects = array( $objects );
+        }
+
+        foreach($objects as $object) {
+            $keys = array_keys($this->data, $object, true);
+            foreach ($keys as $key) {
+                unset($this->data[$key]);
+            }
         }
         $this->_resor(true);
         return $this;
@@ -417,6 +431,30 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         }
 
         return $this;
+    }
+
+    /**
+     * Извлекает последний элемент массива
+     *
+     * @return mixed
+     */
+    public function pop()
+    {
+        $val = array_pop($this->data);
+        $this->_resor(true);
+        return $val;
+    }
+
+    /**
+     * Извлекает первый элемент массива
+     *
+     * @return mixed
+     */
+    public function shift()
+    {
+        $val = array_shift($this->data);
+        $this->_resor(true);
+        return $val;
     }
 
     /**

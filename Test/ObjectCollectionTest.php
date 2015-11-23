@@ -610,6 +610,30 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers Fobia\ObjectCollection::remove
+     */
+    public function testRemove2()
+    {
+        $foo = new Item('foo');
+        $this->object->addAt($foo);
+
+        $arr = array(
+            new Item('foo1'),
+            new Item('foo2'),
+            new Item('foo3'),
+            new Item('foo4'),
+        );
+        $this->object->merge($arr);
+        $this->assertCount(6, $this->object);
+
+        array_pop($arr);
+        $this->object->remove($arr);
+        $this->assertCount(3, $this->object);
+
+        $this->assertEquals('foo4', $this->object->eq(2)->name);
+    }
+
+    /**
      * @covers Fobia\ObjectCollection::each
      */
     public function testEach()
