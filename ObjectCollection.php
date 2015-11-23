@@ -159,13 +159,13 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      *
      * @param callable $callback
      *
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      * @return self
      */
     public function filter($callback)
     {
         if (!is_callable($callback)) {
-            throw new \Exception("CORE: Параметр не является функцией обратного вызова.");
+            throw new \InvalidArgumentException("CORE: Параметр не является функцией обратного вызова.");
         }
 
         $arr = array();
@@ -328,7 +328,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * @param array|ObjectCollection $data
      *
      * @return self
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     public function merge($data)
     {
@@ -349,7 +349,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             });
         }
         else {
-            throw new \Exception("Параметр не являеться масивом");
+            throw new \InvalidArgumentException("Параметр не являеться масивом");
         }
 
         $this->data = array_merge($this->data, $data);
@@ -415,12 +415,12 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * @param mixed    $args
      *
      * @return self
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     public function each($callback, $args = null)
     {
         if (!is_callable($callback)) {
-            throw new \Exception("CORE: Параметр не является функцией обратного вызова.");
+            throw new \InvalidArgumentException("CORE: Параметр не является функцией обратного вызова.");
         }
 
         foreach ($this->data as $key => $obj) {
@@ -487,7 +487,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * @param mixed           $args
      *
      * @return self
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     public function sort($param, $args = null)
     {
@@ -499,7 +499,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
                 usort($this->data, $this->_sort_callable($param, $args));
             }
             else {
-                throw new \Exception("Плохой параметр сортировки");
+                throw new \InvalidArgumentException("Плохой параметр сортировки");
                 // usort($this->data, $this->_sort_property());
             }
         }
@@ -513,12 +513,12 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      * @param string $key
      *
      * @return int
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     protected function _sort_property($key = null)
     {
         if (!$key) {
-            throw new \Exception("Плохой параметр сортировки");
+            throw new \InvalidArgumentException("Плохой параметр сортировки");
         }
 
         return function ($a, $b) use ($key) {
