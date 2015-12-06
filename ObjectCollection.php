@@ -284,6 +284,18 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         }
     }
 
+    public function call($name, array $args = array())
+    {
+        $arr = array();
+        foreach($this->data as $item) {
+            if (method_exists($item, $name)) {
+                $arr[] = call_user_func_array(array($item, $name), $args);
+            }
+        }
+
+        return $arr;
+    }
+
     /**
      * Добавить объект в коллекцию.
      *
