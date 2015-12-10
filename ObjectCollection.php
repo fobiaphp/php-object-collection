@@ -285,6 +285,19 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Add an item to the collection
+     *
+     * @param $item   mixed $item An item of your Collection's object type to be added
+     *
+     * @return $this
+     */
+    public function add($item)
+    {
+        array_push($this->items, (object) $item);
+        return $this;
+    }
+
+    /**
      * Добавить объект в коллекцию.
      *
      * @param \stdObject $object позиция
