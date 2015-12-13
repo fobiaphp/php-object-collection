@@ -26,6 +26,11 @@ class Item
             $this->$keyName = $keyValue;
         }
     }
+
+    function getFullname()
+    {
+        return $this->name . "::" . $this->key;
+    }
 }
 
 /**
@@ -845,5 +850,39 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->object->merge(array($obj));
 
         $this->assertCount(2, $this->object);
+    }
+
+
+    public  function testMergeGeteacht()
+    {
+        $object = new ObjectCollection();
+        $object->add(new Item('value', 'key'));
+        $object->add(new Item('value2', 'key'));
+        $res = $object->geteach(function($obj) {
+            return $obj->getFullname();
+        });
+
+        $this->assertSame(array('value::key', 'value2::key'), $res);
+    }
+
+    /**
+     * @group each
+     */
+    public  function testMergeReplaceTo()
+    {
+        for ($i = 0; $i <= 10; $i++) {
+            $this->object->add(new Item('item-' . $i, $i));
+        }
+
+        $object = $this->object->find(function($obj) {
+            if ($obj->key > 5) {
+                return true;
+            }
+        });
+        // print_r($object);
+
+        $this->assertNotSame($this->object, $object);
+        $object->replaceTo($this->object);
+        $this->assertSame($this->object, $object);
     }
 }

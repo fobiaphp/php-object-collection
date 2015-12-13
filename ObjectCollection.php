@@ -38,8 +38,8 @@ namespace Fobia;
  * элементы являються каждый уникальным.
  *
  *
- * @package  Fobia
- * @author   Dmitriy Tyurin <fobia3d@gmail.com>
+ * @package Fobia
+ * @author  Dmitriy Tyurin <fobia3d@gmail.com>
  */
 class ObjectCollection implements \IteratorAggregate, \Countable
 {
@@ -274,8 +274,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
                 $data[$obj->$name] = $item;
             }
             return $data;
-        }
-        else {
+        } else {
             // ассоциативный массив полея
             foreach ($this->data as $obj) {
                 $data[$obj->$name] = $obj->$fields;
@@ -284,6 +283,28 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         }
     }
 
+
+    public function geteach($callback)
+    {
+        if ( !is_callable($callback) ) {
+            throw new \InvalidArgumentException("Параметр не являеться функцией");
+        }
+        $result = array();
+        foreach ($this->data as $k => $value) {
+            $result[$k] = call_user_func_array($callback, array($value, $k));
+        }
+
+        return $result;
+    }
+
+    /**
+     * Вызвать метод во всех объектах колекции
+     *
+     * @param string $name
+     * @param array  $args
+     *
+     * @return array
+     */
     public function call($name, array $args = array())
     {
         $arr = array();
@@ -299,6 +320,36 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Добавить объект в коллекцию.
      *
+     * @param \stdObject $object
+     *
+     * @return $this
+     */
+    public function add($object)
+    {
+        $strict = true;
+        if (!is_object($object)) {
+            $object = (object) $object;
+            $strict = false;
+        }
+
+        if ($this->_unique) {
+            $keys = array_keys($this->data, $object, $strict);
+            if ($keys) {
+                foreach ($keys as $k) {
+                    unset($this->data[$k]);
+                }
+            }
+        }
+
+        array_push($this->data, $object);
+        $this->_resor(true);
+
+        return $this;
+    }
+
+    /**
+     * Добавить объект в коллекцию.
+     *
      * @param \stdObject $object позиция
      * @param int        $index  позиция
      *
@@ -308,7 +359,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     {
         $strict = true;
         if (!is_object($object)) {
-            $object = (object)$object;
+            $object = (object) $object;
             $strict = false;
         }
         if ($this->_unique) {
@@ -322,13 +373,13 @@ class ObjectCollection implements \IteratorAggregate, \Countable
 
         if ($index === null || $index >= $this->_count) {
             array_push($this->data, $object);
-        }
-        else {
+        } else {
             $arr_before = array_slice($this->data, 0, $index);
             $arr_after = array_slice($this->data, $index);
 
             $this->data = array_merge($arr_before, array($object), $arr_after);
         }
+
         $this->_resor(true);
 
         return $this;
@@ -346,8 +397,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     {
         if ($data instanceof ObjectCollection) {
             $data = $data->toArray();
-        }
-        elseif ($data instanceof \Traversable) {
+        } elseif ($data instanceof \Traversable) {
             $_data = array();
             foreach ($data as $value) {
                 $_data[] = (object)$value;
@@ -359,8 +409,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             array_walk($data, function (&$value) {
                 $value = (object)$value;
             });
-        }
-        else {
+        } else {
             throw new \InvalidArgumentException("Параметр не являеться масивом");
         }
 
@@ -372,6 +421,33 @@ class ObjectCollection implements \IteratorAggregate, \Countable
 
         $this->_resor(true);
 
+        return $this;
+    }
+
+    /**
+     * Очистить
+     *
+     * @return $this
+     */
+    public function clear()
+    {
+        $this->data = array();
+        $this->_count = 0;
+
+        return $this;
+    }
+
+    /**
+     * Перезаписать список в другую колекцию
+     *
+     * @param \Fobia\ObjectCollection $collection
+     *
+     * @return $this
+     */
+    public function replaceTo(ObjectCollection &$collection)
+    {
+        // $collection->clear()->merge($this);
+        $collection = $this;
         return $this;
     }
 
@@ -505,12 +581,10 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     {
         if (is_string($param)) {
             usort($this->data, $this->_sort_property($param));
-        }
-        else {
+        } else {
             if (is_callable($param)) {
                 usort($this->data, $this->_sort_callable($param, $args));
-            }
-            else {
+            } else {
                 throw new \InvalidArgumentException("Плохой параметр сортировки");
                 // usort($this->data, $this->_sort_property());
             }
@@ -518,6 +592,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
 
         return $this;
     }
+
 
     /**
      * Сортировка по свойству
@@ -587,7 +662,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     }
 
     /**
-     * @internal
+     * Return getIterator
+     *
      * @return \ArrayIterator
      */
     public function getIterator()
