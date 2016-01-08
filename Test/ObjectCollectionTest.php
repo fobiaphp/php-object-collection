@@ -693,7 +693,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::sort
-     * @covers Fobia\ObjectCollection::_sort_property
      */
     public function testSort()
     {
@@ -703,9 +702,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
         $this->object->addAt(new Item('new_4', 1));
         $this->object->eq()->key = 1000;
 
-        $this->object->sort('key');
-        $this->assertEquals(1, $this->object->eq()->key);
-
         $this->object->sort(function($a, $b) {
             return ($a->key != 4);
         });
@@ -714,7 +710,6 @@ class ObjectCollectionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Fobia\ObjectCollection::sort
-     * @covers Fobia\ObjectCollection::_sort_property
      * @expectedException \Exception
      */
     public function testSortError1()

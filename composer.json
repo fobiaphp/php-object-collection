@@ -2,6 +2,7 @@
     "name": "fobia/php-object-collection",
     "type": "library",
     "description": "PHP Object Collection",
+    "homepage": "https://github.com/fobiaphp/php-object-collection/",
     "license": "MIT",
     "require": {
         "php": ">=5.3.0"

@@ -86,7 +86,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
      *
      * @param int $index индекс объекта
      *
-     * @return \stdObject
+     * @return \stdClass
      */
     public function eq($index = 0)
     {
@@ -286,7 +286,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
 
     public function geteach($callback)
     {
-        if ( !is_callable($callback) ) {
+        if (!is_callable($callback)) {
             throw new \InvalidArgumentException("Параметр не являеться функцией");
         }
         $result = array();
@@ -308,7 +308,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     public function call($name, array $args = array())
     {
         $arr = array();
-        foreach($this->data as $item) {
+        foreach ($this->data as $item) {
             if (method_exists($item, $name)) {
                 $arr[] = call_user_func_array(array($item, $name), $args);
             }
@@ -320,7 +320,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Добавить объект в коллекцию.
      *
-     * @param \stdObject $object
+     * @param \stdClass $object
      *
      * @return $this
      */
@@ -328,7 +328,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     {
         $strict = true;
         if (!is_object($object)) {
-            $object = (object) $object;
+            $object = (object)$object;
             $strict = false;
         }
 
@@ -350,8 +350,8 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Добавить объект в коллекцию.
      *
-     * @param \stdObject $object позиция
-     * @param int        $index  позиция
+     * @param \stdClass $object позиция
+     * @param int       $index  позиция
      *
      * @return self
      */
@@ -359,7 +359,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     {
         $strict = true;
         if (!is_object($object)) {
-            $object = (object) $object;
+            $object = (object)$object;
             $strict = false;
         }
         if ($this->_unique) {
@@ -404,8 +404,7 @@ class ObjectCollection implements \IteratorAggregate, \Countable
             }
             $data = $_data;
             unset($_data);
-        }
-        elseif (is_array($data)) {
+        } elseif (is_array($data)) {
             array_walk($data, function (&$value) {
                 $value = (object)$value;
             });
@@ -480,10 +479,10 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     public function remove($objects)
     {
         if (!$objects instanceof \Traversable && !is_array($objects)) {
-            $objects = array( $objects );
+            $objects = array($objects);
         }
 
-        foreach($objects as $object) {
+        foreach ($objects as $object) {
             $keys = array_keys($this->data, $object, true);
             foreach ($keys as $key) {
                 unset($this->data[$key]);
@@ -512,7 +511,6 @@ class ObjectCollection implements \IteratorAggregate, \Countable
         }
 
         foreach ($this->data as $key => $obj) {
-            // if (call_user_func_array($callback, array($obj, $key, $args)) === false) {
             if ($callback($obj, $key, $args) === false) {
                 break;
             }
@@ -571,46 +569,21 @@ class ObjectCollection implements \IteratorAggregate, \Countable
     /**
      * Сортирует список, используя функцию обратного вызова либо по полю.
      *
-     * @param callback|string $param int callback ( mixed $a, mixed $b )
-     * @param mixed           $args
+     * @param callback $callable int callback ( mixed $a, mixed $b )
+     * @param mixed    $args
      *
      * @return self
      * @throws \InvalidArgumentException
      */
-    public function sort($param, $args = null)
+    public function sort($callable, $args = null)
     {
-        if (is_string($param)) {
-            usort($this->data, $this->_sort_property($param));
+        if (is_callable($callable)) {
+            usort($this->data, $this->_sort_callable($callable, $args));
         } else {
-            if (is_callable($param)) {
-                usort($this->data, $this->_sort_callable($param, $args));
-            } else {
-                throw new \InvalidArgumentException("Плохой параметр сортировки");
-                // usort($this->data, $this->_sort_property());
-            }
-        }
-
-        return $this;
-    }
-
-
-    /**
-     * Сортировка по свойству
-     *
-     * @param string $key
-     *
-     * @return int
-     * @throws \InvalidArgumentException
-     */
-    protected function _sort_property($key = null)
-    {
-        if (!$key) {
             throw new \InvalidArgumentException("Плохой параметр сортировки");
         }
 
-        return function ($a, $b) use ($key) {
-            return strnatcmp($a->$key, $b->$key);
-        };
+        return $this;
     }
 
     /**
